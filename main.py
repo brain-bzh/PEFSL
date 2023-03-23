@@ -100,7 +100,6 @@ def launch_demo(args):
     # program related constant
     do_inference = False
     doing_registration = False
-    do_reset = False
     prev_frame_time = time.time()
 
     # time related variables
@@ -211,13 +210,12 @@ def launch_demo(args):
             # once the key is pressed, the 10 following frames will be saved as snapshot
             # only the first one will be saved for display
 
-            print("clock_main = ",clock_main, " nm frame init = ", number_frame_init, " do_reset= ", do_reset)
+            print("clock_main = ",clock_main, " nm frame init = ", number_frame_init)
             print("key in possible input : ", (key in possible_input_2))
             if (
                 (key in possible_input or doing_registration or key in possible_input_2)
 
                 and clock_main > number_frame_init
-                and not do_reset
             ):
                 do_inference = False
                 
@@ -253,7 +251,7 @@ def launch_demo(args):
                     doing_registration = False
 
             # perform inference
-            if do_inference and clock_main > number_frame_init and not do_reset:
+            if do_inference and clock_main > number_frame_init:
                 print("inference is running")
                 frame = cv_interface.get_copy_captured_image(args.resolution_input)
                 frame = preprocess(frame)
@@ -286,7 +284,6 @@ def launch_demo(args):
                 do_inference = False
                 current_data.reset()
                 cv_interface.reset_snapshot()
-                do_reset = True
 
             # inference action
             print("Valeur de key = ", key, " Valeur de current data.isrecorded = ", current_data.is_data_recorded())
