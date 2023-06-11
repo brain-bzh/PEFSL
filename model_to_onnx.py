@@ -1,8 +1,8 @@
 """
-script will load models, save torchinfos and onnx (simplified version) for each resolution,
-and replace ReduceMean with GlobalAveragePooling (since ReduceMean is not supported by tensil)
+Script will load a pytorch model, save torchinfos and onnx (simplified version),
+and replace ReduceMean with GlobalAveragePooling (since ReduceMean is not supported by tensil).
 
-If you only need a converted onnx model, this can actually be done using one line of code :
+To convert a pytorch model to onnx format, this can be done as follows:
 
 res_height = 32
 res_width = 32
@@ -27,6 +27,7 @@ If the model feature ReduceMean, use the function replace_reduce_mean.
 
 """
 
+
 import argparse
 import json
 from pathlib import Path
@@ -41,7 +42,6 @@ from tqdm import tqdm
 import warnings
 
 from backbone_loader.backbone_pytorch.model import get_model
-
 
 def replace_reduce_mean(
     onnx_model,
@@ -160,102 +160,59 @@ def model_to_onnx(args):
     # one model = sevral possible resolutions
     # generate summary and save it
 
-    # args arguments
-    input_resolution = [int(i) for i in args.input_resolution]
-
-    if args.from_hub:
-        model_name = f"hub_{args.model_type}_{args.model_specification}"
-    else:
-        model_name = f"{args.model_type}"
-
     # handling path
-    model = get_model(args.model_type, args.model_specification)
+    model = get_model(args.backbone, args.input_model, args.use_strides)
 
     parent_path = Path.cwd() / "onnx"
     parent_path.mkdir(parents=False, exist_ok=True)
     info_path = parent_path / "infos"
     info_path.mkdir(parents=False, exist_ok=True)
-    weight_desc_file = info_path / f"{model_name}_description.json"
-
-    min_res = 32
-    max_res = 100  # max(input_resolution)#TODO res is to be set in function of maximum identified resolution for fpga
-
-    number_eval = 100
-    step_res = 10
-    possible_res = [i for i in range(min_res, max_res, step_res)]
 
     # not sure it's needed, but it might be for uninitilized network
-    dummy_input = torch.randn(1, 3, min_res, min_res, device="cpu")
+    dummy_input = torch.randn(1, 3, args.input_resolution, args.input_resolution, device="cpu")
     _ = model(dummy_input)
 
-    # for each input, create the corresponding file
-    for input_resolution in input_resolution:
-        ans=torchinfo.summary(model,(3,input_resolution,input_resolution),batch_dim = 0,verbose=0,device="cpu",col_names=
-            ["input_size",
-            "output_size",
-            "num_params",
-            "kernel_size",
-            "mult_adds"])
+    ans=torchinfo.summary(model,(3,args.input_resolution,args.input_resolution),batch_dim = 0,verbose=0,device="cpu",col_names=
+        ["input_size",
+        "output_size",
+        "num_params",
+        "kernel_size",
+        "mult_adds"])
 
+    dummy_input = torch.randn(1, 3, args.input_resolution,args.input_resolution, device="cpu")
 
+    with open(info_path/ f"{args.save_name}_torchinfo.txt","w",encoding="utf-8") as file:
+        to_write= str(ans)
+        file.write(to_write)
+        print("Infos saved in: ", info_path/ f"{args.save_name}_torchinfo.txt")
 
+    # generate onnx
+    path_model=parent_path/ f"{args.save_name}.onnx"
+    print("Model saved in: ",path_model)
+    torch.onnx.export(model, dummy_input, path_model, verbose=False, opset_version=10, output_names=[args.output_names])
 
-        dummy_input = torch.randn(1, 3, input_resolution,input_resolution, device="cpu")
+    #load onnx
+    onnx_model = onnx.load(path_model)
+    onnx_model = replace_reduce_mean(onnx_model)
 
+    # convert model
+    model_simp, check = simplify(onnx_model)
+    assert check, "Simplified ONNX model could not be validated"
 
-        with open(info_path/ f"{args.save_name}_{input_resolution}x{input_resolution}_torchinfo.txt","w",encoding="utf-8") as file:
-            to_write= str(ans)
-            file.write(to_write)
-
-        # generate onnx
-        path_model=parent_path/ f"{args.save_name}_{input_resolution}x{input_resolution}.onnx"#f"{model_name}_{weight_name}_{input_resolution}_{input_resolution}.onnx"
-        #path_model_simp=parent_path/ f"simp_{model_name}_{input_resolution}_{input_resolution}.onnx"
-        torch.onnx.export(model, dummy_input, path_model, verbose=False, opset_version=10, output_names=[args.output_names])
-
-        #load onnx
-
-        onnx_model = onnx.load(path_model)
-        onnx_model = replace_reduce_mean(onnx_model)
-        # convert model
-        model_simp, check = simplify(onnx_model)
-        print("model was simplified")
-        assert check, "Simplified ONNX model could not be validated"
-
-        onnx.save(model_simp, path_model)
-
-
+    onnx.save(model_simp, path_model)
 
 if __name__ == "__main__":
     # Define the command line arguments for the script
 
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--input-resolution",
-        nargs="+",
-        required=True,
-        help="Input resolution(s) of the images (squared images), ex: 32 64",
-    )
-    parser.add_argument(
-        "--from-hub", action="store_true", help="if true, add hub- to name"
-    )
-    parser.add_argument(
-        "--model-type", type=str, required=True, help="Specification of the model"
-    )
-    parser.add_argument(
-        "--model-specification",
-        type=str,
-        required=True,
-        help="additional specs for model. 1. easy_resnet, path to weight 2. one of hardcoded kwargs in model.py",
-    )
-    parser.add_argument(
-        "--output-names", default="Output", help="Name of the output layer"
-    )
-    parser.add_argument(
-        "--check-perf",
-        action="store_true",
-        help="if specified, will perform inference evaluations",
-    )
-    parser.add_argument("--save-name", required=True, help="Name of the save model")
+    parser.add_argument("--input-resolution", type=int, required=True, choices=range(32,100), metavar="[32-100]",
+        help="Input resolution(s) of the images (squared images), must be int between 32 and 100")
+    parser.add_argument("--backbone", type=str, required=True, choices = ["resnet9", "resnet12"],
+                         help="Specification of the model")
+    parser.add_argument("--input-model", type=str, required=True, help="path to input pytorch model")
+    parser.add_argument("--output-names", default="Output", help="Name of the output layer")
+    parser.add_argument("--save-name", required=True, default="mymodel", help="Name of the saved model")
+    parser.add_argument("--use-strides", action="store_true", help="Use strides instead of maxpooling")
     args = parser.parse_args()
 
     model_to_onnx(args)
