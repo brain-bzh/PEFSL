@@ -47,11 +47,12 @@ def draw_indic2(frame, percentages, shot_frames, font, font_scale, font_thicknes
         if y_end<height:
             #draw shots
             for n_shot in range(len(images)):
-                frame[y_start:y_end , x_start:x_end] = images[n_shot]
-                x_start = x_start + shot_shift
-                x_end = x_end + shot_shift
-                y_start = y_start + shot_shift
-                y_end = y_end + shot_shift
+                if y_end<height:
+                    frame[y_start:y_end , x_start:x_end] = images[n_shot]
+                    x_start = x_start + shot_shift
+                    x_end = x_end + shot_shift
+                    y_start = y_start + shot_shift
+                    y_end = y_end + shot_shift
             cv2.putText(frame,f"class {k}",(x_start, y_end - shot_height + 2*shot_shift),font,font_class_scale,(0, 0, 255),font_class_thickness,cv2.LINE_AA)
             cv2.putText(frame,f"{n_shot+1}",(x_end - 4*shot_shift, y_end - shot_height + 2*shot_shift),font,font_class_scale,(0, 0, 255),font_class_thickness,cv2.LINE_AA)
             #draw level
@@ -260,17 +261,12 @@ class OpencvInterface:
         """
         write fps on the left and clock on the right of the headband
         """
-
         height, width, _ = self.frame.shape
 
-        headband_width = width
         headband_height = int(0.1*height)
         top_gap = int(0.74*headband_height)
         bloc_gap = int(0.04 * height)
 
-        #put fps on the frame
-        cv2.putText(self.frame, f'fps : {fps}', (bloc_gap , top_gap), self.font, self.font_scale, (0, 0, 0), self.font_thickness, cv2.LINE_AA)
-    
         #calculate the shift to shift the clock for every decade
         div = clock
         clock_shift_text = 0
@@ -288,6 +284,8 @@ class OpencvInterface:
         clock_end = (width , 0)
         cv2.rectangle(self.frame, clock_start, clock_end, (255,255,255), cv2.FILLED)
 
+        #put fps on the frame
+        cv2.putText(self.frame, f'fps : {fps}', (bloc_gap , top_gap), self.font, self.font_scale, (0, 0, 0), self.font_thickness, cv2.LINE_AA)
         #put clock on the frame
         cv2.putText(self.frame, f'clock : {clock}', clock_origin, self.font, self.font_scale, (0, 0, 0), self.font_thickness, cv2.LINE_AA)
 

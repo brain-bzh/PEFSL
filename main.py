@@ -121,6 +121,7 @@ def launch_demo(args):
     # --------------------------------------
 
     RES_OUTPUT = tuple(map(int,args.output_resolution.split('x')))
+    
     FONT_SCALE = 0.001*RES_OUTPUT[0]
     FONT_THICKNESS = int(np.round(0.0025*RES_OUTPUT[0]))
     PADDING = tuple(args.padding)
@@ -131,10 +132,10 @@ def launch_demo(args):
     few_shot_model = FewShotModel(args.classifier_specs)
 
     # data holding variables
-    possible_input = [str(i) for i in range(177, 185)]
-    possible_input_2 = ["1", "2", "3", "4"]
+    possible_input_keyboard = [chr(i) for i in range(177, 185)]
+    possible_input_pynq = ["1", "2", "3", "4"]
 
-    class_num = len(possible_input)
+    class_num = len(possible_input_keyboard)
     current_data = DataFewShot(class_num)
 
     # program related constant
@@ -169,11 +170,12 @@ def launch_demo(args):
         mode = VideoMode(w, h, 24)  # 24 : pixel format
         hdmi_out.configure(mode)
         hdmi_out.start()
-
+ 
     if args.button_keyboard == "button":
         from input_output.boutons_manager import BoutonsManager
 
         btn_manager = BoutonsManager(args.overlay.btns_gpio)
+    
     if args.save_video:
         fourcc = cv2.VideoWriter_fourcc(*"XVID")
         out = cv2.VideoWriter("output.avi", fourcc, 30.0, RES_OUTPUT)
@@ -198,18 +200,19 @@ def launch_demo(args):
                 print("failed to get next image")
                 exit(1)
             frameread_time = time.time() - initial_time
+            
             # keyboard/button input
             if args.button_keyboard == "keyboard":
                 key = cv_interface.get_key()
                 key = chr(key)  # key convertion to char
+                possible_input = possible_input_keyboard
             elif args.button_keyboard == "button":
                 key = btn_manager.change_state()
-            elif args.button_keyboard == "button":
-                key = btn_manager.change_state()
+                possible_input = possible_input_pynq
             else:
                 print("Arg button_keyboard invalid")
-
-            # initialisation
+            
+            # initialization
             if clock_main <= number_frame_init:
                 frame = cv_interface.get_copy_captured_image(args.resolution_input)
                 frame = preprocess(frame)
@@ -222,43 +225,35 @@ def launch_demo(args):
                     current_data.aggregate_mean_rep()
                     if args.use_saved_sample:
                         path_sample = args.path_shots_video
-                        compute_and_add_feature_saved_image(
-                            backbone, cv_interface, current_data, path_sample
-                        )
+                        compute_and_add_feature_saved_image(backbone, cv_interface, current_data, path_sample)
                         key = "i"  # simulate press of the key for inference
 
                         print(key)
 
-                if key in possible_input or key in possible_input_2:
-                    if key in possible_input:
-                        classe = possible_input.index(key)
-                    else:
-                        classe = possible_input_2.index(key)
+                if key in possible_input:
+                    classe = possible_input.index(key)
                     last_detected = clock_main * 1  # time.time()
+                
                 cv_interface.draw_headband()
                 cv_interface.put_text("Initialization", 0.2)
 
             # if shot acquisition : stop inference and add image
             # once the key is pressed, the 10 following frames will be saved as snapshot
             # only the first one will be saved for display
-
             if (
-                (key in possible_input or doing_registration or key in possible_input_2)
+                (key in possible_input or doing_registration)
                 and clock_main > number_frame_init
                 and not do_reset
             ):
                 do_inference = False
 
-                if key in possible_input or key in possible_input_2:
-                    if key in possible_input:
-                        classe = possible_input.index(key)
-                    else:
-                        classe = possible_input_2.index(key)
+                if key in possible_input:
+                    classe = possible_input.index(key)
                     last_detected = clock_main * 1  # time.time()
 
                 frame = cv_interface.get_copy_captured_image(args.resolution_input)
 
-                if (key in possible_input) or (key in possible_input_2):
+                if key in possible_input:
                     # if this is the first frame (ie there was an user input)
                     cv_interface.add_snapshot(classe)
 
