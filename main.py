@@ -96,9 +96,10 @@ def preprocess(img, dtype=np.float32):
     # img=img.astype(dtype)
 
     if img.dtype != dtype:
-        # not that this copy the image
+        # note that this copy the image
         img = img.astype(dtype)
     img = img[None, :]
+    # normalization (assume the backbone used miniimagnet normalisation during training)
     return (img / 255 - np.array([0.485, 0.456, 0.406], dtype=dtype)) / np.array(
         [0.229, 0.224, 0.225], dtype=dtype
     )
