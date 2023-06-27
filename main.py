@@ -106,7 +106,7 @@ def preprocess(img, dtype=np.float32):
 
 
 # constant of the program
-SCALE = 1
+
 # RES_OUTPUT = tuple(args.output_resolution) # weight / height (cv2 convention)
 RES_HDMI = (600, 800)  # weight height
 # PADDING = tuple(args.padding)
@@ -121,8 +121,12 @@ def launch_demo(args):
     # INITIALIZATION
     # --------------------------------------
 
-    RES_OUTPUT = tuple(args.output_resolution)
+    RES_OUTPUT = tuple(map(int,args.output_resolution.split('x')))
+    FONT_SCALE = 0.001*RES_OUTPUT[0]
+    FONT_THICKNESS = int(np.round(0.0025*RES_OUTPUT[0]))
     PADDING = tuple(args.padding)
+    if FONT_THICKNESS==0:
+        FONT_THICKNESS = 1
 
     backbone = get_model(args.backbone_specs)
     few_shot_model = FewShotModel(args.classifier_specs)
@@ -157,7 +161,7 @@ def launch_demo(args):
         # cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
     # cv_interface manage graphical manipulation
     # TODO : add input/output to serparate class and use with statement
-    cv_interface = OpencvInterface(cap, SCALE, RES_OUTPUT, FONT, class_num)
+    cv_interface = OpencvInterface(cap, RES_OUTPUT, FONT, FONT_SCALE, FONT_THICKNESS, class_num)
 
     if args.hdmi_display:
         from pynq.lib.video import VideoMode
@@ -232,8 +236,8 @@ def launch_demo(args):
                     else:
                         classe = possible_input_2.index(key)
                     last_detected = clock_main * 1  # time.time()
-
-                cv_interface.put_text("Initialization")
+                cv_interface.draw_headband()
+                cv_interface.put_text("Initialization", 0.2)
 
             # if shot acquisition : stop inference and add image
             # once the key is pressed, the 10 following frames will be saved as snapshot
@@ -269,11 +273,11 @@ def launch_demo(args):
 
                 if abs(clock_main - last_detected) < 10:
                     doing_registration = True
-                    text = f"Class :{classe} registered. \
-                    Number of shots: {cv_interface.get_number_snapshot(classe)}"
-                    cv_interface.put_text(text)
+                    cv_interface.draw_headband(1.75)
+                    cv_interface.put_text(f"Class : {classe} registered", 0.3)
+                    cv_interface.put_text(f"Number of shots : {cv_interface.get_number_snapshot(classe)}", 0.315, 2)
                     if(clock_main - last_detected == 0):
-                        print(text)
+                        print(f"Class : {classe} registered. Number of shots : {cv_interface.get_number_snapshot(classe)}")
                 else:
                     doing_registration = False
 
@@ -295,15 +299,12 @@ def launch_demo(args):
                     current_data.get_shot_list(),
                     current_data.get_mean_features(),
                 )
-
-                cv_interface.put_text(f"Object is from class :", classe_prediction)
+                cv_interface.draw_headband()
+                cv_interface.put_text(f"Object is from class : {classe_prediction}", 0.38)
                 cv_interface.draw_indicator(probabilities)
 
-            # add info on frame
-            cv_interface.put_text(f"fps:{custom_format(fps)}", bottom_pos_x=0.05, bottom_pos_y=0.1)
-            cv_interface.put_text(
-                f"frame number:{clock}", bottom_pos_x=0.8, bottom_pos_y=0.1
-            )
+            # add fps and clock on frame
+            cv_interface.put_fps_clock(fps,clock)
 
             # update current state
             # reset action
@@ -317,7 +318,8 @@ def launch_demo(args):
 
             if do_reset == True and clock_main > number_frame_restart:
                 do_reset = False
-                cv_interface.put_text("Initialization and relaunch the demo")
+                cv_interface.draw_headband()
+                cv_interface.put_text("Reset", 0.09)
             
             # Dans la ligne suivante, il faudra enlever le not, je l'ai ajouté pour faire l'inférence
             if key == "i" and current_data.is_data_recorded():
@@ -356,7 +358,7 @@ def launch_demo(args):
                 frame_to_save = cv_interface.frame
                 out.write(frame_to_save)
             total_time = time.time() - initial_time
-            fps = 1 / (total_time)
+            fps = np.round(1 / (total_time),1)
 
             terminal.log(fps, total_time, frameread_time, backbone_time, probabilities)
 

@@ -70,7 +70,9 @@ def parse_model_params(parser):
     )
     # classification head
     model_args.add_argument(
-        "--resolution-input", default=32, help="resolution of the input image"
+        "--resolution-input",
+        default=32,
+        help="resolution of the input image"
     )
     model_args.add_argument(
         "--classifier_type",
@@ -122,7 +124,7 @@ def parse_model_params(parser):
 
     pynq_parser.add_argument(
         "--path_bit",
-        default="/home/xilinx/design.bit",
+        default="/home/xilinx/package_demo/design.bit",
         type=str,
         help="The bitstream name or absolute path as a string. To see how to generate it, look at the tensil documentation",
     )
@@ -135,7 +137,7 @@ def parse_model_params(parser):
 
     pynq_parser.add_argument(
         "--path_tmodel",
-        default="/home/xilinx/resnet12_32_32_small_onnx_pynqz1.tmodel",
+        default="/home/xilinx/package_demo/resnet9_fm16_32x32_onnx_custom_perf.tmodel",
         type=str,
         help="path of the tmodel. The tprog and tdata should be in the same folder",
     )
@@ -165,9 +167,8 @@ def parse_args_demonstration(parser):
     )
     demonstration_arguments.add_argument(
         "--output-resolution",
-        default=[800, 480],
-        nargs="+",
-        type=int,
+        default='800x540',
+        type=str,
         help="output resolution of the opencv frame (width height) (for the pynq)",
     )
     demonstration_arguments.add_argument(
@@ -188,14 +189,20 @@ def parse_args_demonstration(parser):
         action="store_true",
         help="if you add this flag, the video will be saved as output.avi",
     )
-    demonstration_arguments.add_argument("--hdmi-display", action="store_true")
+    demonstration_arguments.add_argument(
+        "--hdmi-display",
+        action="store_true"
+    )    
     demonstration_arguments.add_argument(
         "--video-format",
         type=str,
         default="DIVX",
         help="see ttps://docs.opencv.org/3.4/dd/d43/tutorial_py_video_display.html for possible option",
     )
-    demonstration_arguments.add_argument("--max_number_of_frame", type=int)
+    demonstration_arguments.add_argument(
+        "--max_number_of_frame",
+        type=int
+    )    
     demonstration_arguments.add_argument(
         "--use-saved-sample",
         action="store_true",
@@ -212,7 +219,7 @@ def parse_args_demonstration(parser):
     )
     demonstration_arguments.add_argument(
         "--button-keyboard",
-        default="keyboard",
+        default="button",
         help="Input device for the button. Can be keyboard (only on computer) or button (only on pynq)",
     )
 
