@@ -75,6 +75,7 @@ Weights available [on this link](https://drive.google.com/drive/folders/1ftzFL3B
 ## Conversion to tensil
 Once you generated the onnx file for your model, you can generate the tensil model using the script [onnx_to_tensil.py](onnx_to_tensil.py).
 
+(docker need to be installed, as well as [docker tensil image](https://hub.docker.com/r/tensilai/tensil). Compilation may take some time.
 ```bash
     usage: onnx_to_tensil.py [-h] [--onnx-path ONNX_PATH] [--arch-path ARCH_PATH]
                          [--output-dir OUTPUT_DIR] [--onnx-output ONNX_OUTPUT]
