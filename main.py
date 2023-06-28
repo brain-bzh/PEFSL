@@ -358,7 +358,11 @@ def launch_demo(args):
                 frame_to_save = cv_interface.frame
                 out.write(frame_to_save)
             total_time = time.time() - initial_time
-            fps = np.round(1 / (total_time),1)
+            
+            if total_time==0:
+                fps = np.inf
+            else:
+                fps = np.round(1 / (total_time),1)
 
             terminal.log(fps, total_time, frameread_time, backbone_time, probabilities)
 

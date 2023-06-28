@@ -20,31 +20,10 @@ You can check your model using netron. If you see that your model have Identity 
 from onnxsim import simplify
 
 onnx_model = onnx.load(path_model)
-# convert model
 model_simp, check = simplify(onnx_model)
 onnx.save(model_simp, path_model)
 
-
-
-python model_to_onnx.py --input-resolution 32 64 84 --save-name "tiny_miniimagenet" --model-type "easy_resnet12_tiny" --model-specification "weights/tinymini1.pt1" --weight-description "weight from easy repo"
-python model_to_onnx.py --input-resolution 32 64 84 --save-name "small_miniimagenet" --model-type "easy_resnet12_small" --model-specification "weights/smallmini1.pt1" --weight-description "weight from easy repo"
-python model_to_onnx.py --input-resolution 32 --save-name "small_cifar" --model-type "easy_resnet12_small" --model-specification "weights/smallcifar1.pt1" --weight-description "weight from easy repo"
-python model_to_onnx.py --input-resolution 32 --save-name "tiny_cifar" --model-type "easy_resnet12_tiny" --model-specification "weights/tinycifar1.pt1" --weight-description "weight from easy repo"
-
-
-
-# exemple of command line loading network from pytorch hub (also convert the classification head, you should adapt the script to delete thoses nodes)
-python model_to_onnx.py --input-resolution 32 64 84 128  --model-type "mobilenet_v2" --model-specification "pretrained" --weight-description "weight trained on imagenet"  --from-hub
-python model_to_onnx.py --input-resolution 32 64 84 128  --model-type "mnasnet0_5" --model-specification "random_init" --weight-description "weight random"  --from-hub
-
-not implemented in Tensil
-python model_to_onnx.py --input-resolution 32 64 128  --model-type "nvidia_efficientnet_b0" --model-specification "random_init" --weight-description "weight random"  --from-hub
-python model_to_onnx.py --input-resolution 32 64 128  --model-type "shufflenet_v2_x0_5" --model-specification "pretrained" --weight-description "weight trained on imagenet"  --from-hub
-python model_to_onnx.py --input-resolution 32 64 128  --model-type "squeezenet1_1" --model-specification "pretrained" --weight-description "weight trained on imagenet"  --from-hub
-python model_to_onnx.py --input-resolution 32 64 128  --model-type "inception_v3" --model-specification "pretrained" --weight-description "weight trained on imagenet"  --from-hub
-python model_to_onnx.py --input-resolution 32 64 128  --model-type "googlenet" --model-specification "pretrained" --weight-description "weight trained on imagenet"  --from-hub
-python model_to_onnx.py --input-resolution 32 64  --model-type "densenet121" --model-specification "pretrained" --weight-description "weight trained on imagenet"  --from-hub
-python model_to_onnx.py --input-resolution 32 64 128  --model-type "nvidia_gpunet" --model-specification "pretrained" --weight-description "weight trained on imagenet"  --from-hub
+If the model feature ReduceMean, use the function replace_reduce_mean.
 
 """
 
@@ -62,24 +41,6 @@ from tqdm import tqdm
 import warnings
 
 from backbone_loader.backbone_pytorch.model import get_model
-
-
-def save_weight_description(path_description, model_specification, weight_desc):
-    # Load the existing data from the JSON file
-    try:
-        with open(path_description) as f:
-            data = json.load(f)
-    except:
-        data = {}
-
-    # Check if the weight path is already in the data
-    if model_specification not in data:
-        # Append the weight description to the data
-        data[model_specification] = weight_desc
-        with open(path_description, "w") as f:
-            json.dump(data, f)
-    else:
-        print("description already present, no modification will be done")
 
 
 def replace_reduce_mean(
@@ -216,11 +177,6 @@ def model_to_onnx(args):
     info_path.mkdir(parents=False, exist_ok=True)
     weight_desc_file = info_path / f"{model_name}_description.json"
 
-    # Saving
-    save_weight_description(
-        weight_desc_file, args.model_specification, args.weight_description
-    )
-
     min_res = 32
     max_res = 100  # max(input_resolution)#TODO res is to be set in function of maximum identified resolution for fpga
 
@@ -258,7 +214,6 @@ def model_to_onnx(args):
 
         #load onnx
 
-
         onnx_model = onnx.load(path_model)
         onnx_model = replace_reduce_mean(onnx_model)
         # convert model
@@ -291,9 +246,6 @@ if __name__ == "__main__":
         type=str,
         required=True,
         help="additional specs for model. 1. easy_resnet, path to weight 2. one of hardcoded kwargs in model.py",
-    )
-    parser.add_argument(
-        "--weight-description", required=True, help="Description of the weight file"
     )
     parser.add_argument(
         "--output-names", default="Output", help="Name of the output layer"
