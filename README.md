@@ -49,11 +49,11 @@ Button 3: reset the demo
 
 available model :
 
-|      Model Name           | miniimagnet acc |  latency  |
-| ----------- ------------  | --------------- |  -------  |
-| resnet9_strided_16fmaps   | 53.7            |   30 fps  |
-| resnet9_strided_24fmaps   | 55.2            |   15 fps  |
-| resnet9_strided_24fmaps   | 56.2            |   7 fps   |
+ |      Model Name           | miniimagnet acc |  latency  |
+ | ----------- ------------  | --------------- |  -------  |
+ | resnet9_strided_16fmaps   |      53.7       |   30 fps  |
+ | resnet9_strided_24fmaps   |      55.2       |   15 fps  |
+ | resnet9_strided_24fmaps   |      56.2       |   7 fps   |
 
 
 # How to install and run the demo on your computer
