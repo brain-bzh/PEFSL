@@ -35,7 +35,7 @@ Button 3: reset the demo
     git clone git@github.com:tensil-ai/tensil.git
     scp -r tensil/drivers/tcu_pynq xilinx@192.168.2.99:
     ```
-3. Copy the hardware (bitstream & metadata) and the tensil model files on the PYNQ. Demo files are available [on this link](https://partage.imt.fr/index.php/s/fKkPSYMWR9gjEmK/download).
+3. Copy the hardware (bitstream & metadata) and the tensil model files on the PYNQ. Demo files are available [on this link]( https://drive.google.com/file/d/1i1uPCTf-OTGsKhUjp1eM9MIDExU2cXd4/view?usp=sharing).
 4. Clone or copy this repository on the PYNQ.
 
 ## Run the demo
@@ -57,20 +57,20 @@ available model :
 
 
 # How to install and run the demo on your computer
-It is also possible to run the demo on your computer using pytorch. Example weights are also available [on this link](https://partage.imt.fr/index.php/s/fKkPSYMWR9gjEmK/download) under the name `resnet9_strided_16fmaps.onnx`. In order to run the demo using pytorch (install opencv):
+It is also possible to run the demo on your computer using onnx. Example weights are also available [on this link]( https://drive.google.com/file/d/1i1uPCTf-OTGsKhUjp1eM9MIDExU2cXd4/view?usp=sharing) under the name `resnet9_strided_16fmaps.onnx`. In order to run the demo using onnx : 
 
-pytorch : 
-(install pytorch in python env as well) (checkout [python file](backbone_loader/backbone_pytorch/model.py) for implemented models) (backbone weight must match backbone type)
+using pytorch backbone : 
+(checkout [python file](backbone_loader/backbone_pytorch/model.py) for implemented models name) (backbone weight must match backbone type)
 ```bash
 python3 main.py --resolution-input 32 --backbone-type brain_resnet9_tiny_strided --buton-keyboard keyboard pytorch --path-onnx weights/resnet9_strided_32fmaps.pt
 ``` 
 
-or onnx :
+or onnx (easier):
 (install onnx-runtime in python env as well) (resolution-input must match input resolution of onnx file, you can check it using tool like netron)
 ```bash
 python3 main.py --buton-keyboard keyboard onnx --resolution-input 32 --path-onnx weights/resnet9_strided_16fmaps.onnx
 ```
-Other backbones examples and weights are available on the EASY repository: https://github.com/ybendou/easy.
+Other backbones examples and pytorch weights are available on the EASY repository: https://github.com/ybendou/easy.
 
 The inputs are the following: {1-4} to register shots for classes {0-3}, i to start inference, r to reset the demo, q to quit.
 
@@ -166,8 +166,6 @@ python3 main.py tensil --help
     - Sometimes there is a bug with memory allocation (an error is raised). We are investigating it. For now if it happens, just reset the PYNQ.
     - In the PYNQ, always launch the scripts while beeing authentify as root
     - Somethimes PYNQ need to be reset between executions of the program in order to use the hdmi
-    - when launching the model, if the tarch used when compiling the model does not correspond to the accelerator, the scripts fail silently.
-    - the class id must be sequentialy set (first the 0, then 1, ect...)
-    - Should be at least enough elements to form queries + n_shots for the evaluation
-    - the current implementation of knn expect an even number of samples for every class
+    - When launching the model, if the tarch used when compiling the model does not correspond to the accelerator, the scripts fail silently.
+    - The class id must be sequentialy set (first the 0, then 1, ect...) on the computer
 
