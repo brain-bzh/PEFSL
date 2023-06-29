@@ -1,6 +1,10 @@
 import torch
 import torch.nn as nn
+<<<<<<< Updated upstream
 import random  # for manifold mixup
+=======
+import random # for manifold mixup
+>>>>>>> Stashed changes
 from functools import partial
 
 
@@ -81,7 +85,11 @@ class ResNet9(nn.Module):
         self.block1 = BasicBlockRN12(3, feature_maps,use_strides=use_strides)
         self.block2 = BasicBlockRN12(feature_maps, int(2.5 * feature_maps),use_strides=use_strides)
         self.block3 = BasicBlockRN12(int(2.5 * feature_maps), 5 * feature_maps,use_strides=use_strides)
+<<<<<<< Updated upstream
         self.mp =nn.Identity() if use_strides else nn.MaxPool2d(2)
+=======
+        self.mp =nn.Identity() if use_strides else nn.MaxPool2d(2) 
+>>>>>>> Stashed changes
 
     def forward(self, x, mixup=None, lbda=None, perm=None):
         mixup_layer = -1
@@ -121,7 +129,11 @@ class ResNet12Brain(nn.Module):
         self.block2 = BasicBlockRN12(feature_maps, int(2.5 * feature_maps),use_strides=use_strides)
         self.block3 = BasicBlockRN12(int(2.5 * feature_maps), 5 * feature_maps,use_strides=use_strides)
         self.block4 = BasicBlockRN12(5 * feature_maps, 10 * feature_maps,use_strides=use_strides)
+<<<<<<< Updated upstream
         self.mp =nn.Identity() if use_strides else nn.MaxPool2d(2)
+=======
+        self.mp =nn.Identity() if use_strides else nn.MaxPool2d(2) 
+>>>>>>> Stashed changes
 
     def forward(self, x, mixup=None, lbda=None, perm=None):
         mixup_layer = -1

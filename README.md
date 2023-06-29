@@ -47,6 +47,15 @@ Button 3: reset the demo
     ```
 3. The demo should be running now on the HDMI screen. You can use the buttons on the PYNQ to interact with the demo as described above.
 
+available model :
+
+|      Model Name           | miniimagnet acc |  latency  |
+| ----------- ------------  | --------------- |  -------  |
+| resnet9_strided_16fmaps   | 53.7            |   30 fps  |
+| resnet9_strided_24fmaps   | 55.2            |   15 fps  |
+| resnet9_strided_24fmaps   | 56.2            |   7 fps   |
+
+
 # How to install and run the demo on your computer
 It is also possible to run the demo on your computer using pytorch. Example weights are also available [on this link](https://partage.imt.fr/index.php/s/fKkPSYMWR9gjEmK/download) under the name `resnet9_strided_16fmaps.onnx`. In order to run the demo using pytorch (install opencv):
 
@@ -67,7 +76,7 @@ The inputs are the following: {1-4} to register shots for classes {0-3}, i to st
 
 # How to train a model, convert it to onnx, then to tensil and finally run it on the PYNQ
 ## Schema of the process
-![plot](./static/process.png)
+![plot](./static/demo_screenshot.png)
 
 
 ## How to train a backbone model

@@ -8,7 +8,7 @@ Save :
 import docker
 import os
 import argparse
-
+from pathlib import Path
 
 
 def move_file(compiled_model_name, output_path):
@@ -55,7 +55,7 @@ def save_compilation_result(logs, name, path):
 def main():
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--onnx-path', type=str, help='path to onnx file', required=True)
+    parser.add_argument('--onnx-path', type=Path, help='path to onnx file', required=True)
     parser.add_argument('--arch-path', type=str, default= "arch/custom_perf.tarch", help='path to tensil architecture file')
     parser.add_argument('--output-dir', type=str, default= "tensil/", help='path to script output directory')
     parser.add_argument('--onnx-output', type=str, default= "Output", help='name of the onnx output layer (better to keep default) (default = Output)')
@@ -68,20 +68,20 @@ def main():
     # Network Compilation
     print("Tensil compiling...")
 
-    network = args.onnx_path
     pwd = os.getcwd()
     try:
         client = docker.from_env()
     except docker.errors.DockerException as er:
         raise docker.errors.DockerException("error when initializing docker client, maybe it's not launch ?") from er#
-    name_net = network.split(sep="/")
-    name_net = name_net[-1][:-5]
+    
+
+    name_net = args.onnx_path.stem
     try:
         # - a : architecture
         # - m : onnx model
         # -v  : verbose
 
-        # additional summary (all default to false):
+        # additional summary (all default to true):
         # -s : print summary
         # --layers-summary
         # --scheduler-summary
@@ -92,7 +92,7 @@ def main():
         summary_flags=["-s", "true","--layers-summary","true","--scheduler-summary","true","--partitions-summary","true","--strides-summary","true","--instructions-summary","true"]
 
         log_casa = client.containers.run("tensilai/tensil:latest",
-                                            ["tensil", "compile", "-a", args.arch_path, "-m", network,
+                                            ["tensil", "compile", "-a", args.arch_path, "-m", args.onnx_path.as_posix(),
                                             "-o", args.onnx_output, "-t", args.output_dir]+summary_flags,
                                             volumes=[pwd + ":/work"],
                                             working_dir="/work",
