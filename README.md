@@ -35,7 +35,7 @@ Button 3: reset the demo
     git clone git@github.com:tensil-ai/tensil.git
     scp -r tensil/drivers/tcu_pynq xilinx@192.168.2.99:
     ```
-3. Copy the hardware (bitstream & metadata) and the tensil model files on the PYNQ. Demo files are available [on this link]( https://drive.google.com/file/d/1i1uPCTf-OTGsKhUjp1eM9MIDExU2cXd4/view?usp=sharing).
+3. Copy the hardware (bitstream & metadata) and the tensil model files on the PYNQ. Demo files are available [on this link](https://drive.google.com/file/d/19aIv5Jg4f_P2YPVplAxVkskOFkNQysTb/view?usp=sharing).
 4. Clone or copy this repository on the PYNQ.
 
 ## Run the demo
@@ -57,7 +57,7 @@ available model :
 
 
 # How to install and run the demo on your computer
-It is also possible to run the demo on your computer using onnx. Example weights are also available [on this link]( https://drive.google.com/file/d/1i1uPCTf-OTGsKhUjp1eM9MIDExU2cXd4/view?usp=sharing) under the name `resnet9_strided_16fmaps.onnx`. In order to run the demo using onnx : 
+It is also possible to run the demo on your computer using onnx. Example weights are also available [on this link](https://drive.google.com/file/d/19aIv5Jg4f_P2YPVplAxVkskOFkNQysTb/view?usp=sharing) under the name `resnet9_strided_16fmaps.onnx`. In order to run the demo using onnx : 
 
 using pytorch backbone : 
 (checkout [python file](backbone_loader/backbone_pytorch/model.py) for implemented models name) (backbone weight must match backbone type)
