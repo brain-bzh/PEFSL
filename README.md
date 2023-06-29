@@ -3,7 +3,7 @@ This repository contains the code to perform online Few shot Learning with a web
 
 ## This is what it looks like:
 
-![plot](./static/demo_webcam.png)
+![plot](./static/demo_screenshot.png)
 
 There are two steps in the demonstration :
 - first you need to take a few shots of the classes you want to recognize
