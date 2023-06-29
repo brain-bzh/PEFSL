@@ -76,7 +76,7 @@ The inputs are the following: {1-4} to register shots for classes {0-3}, i to st
 
 # How to train a model, convert it to onnx, then to tensil and finally run it on the PYNQ
 ## Schema of the process
-![plot](./static/demo_screenshot.png)
+![plot](./static/process.png)
 
 
 ## How to train a backbone model
