@@ -142,6 +142,7 @@ def launch_demo(args):
     do_inference = False
     doing_registration = False
     do_reset = False
+    demo_ON = True # True = on / False = off
 
     # time related variables
     # clock : number of frames since begining
@@ -170,7 +171,7 @@ def launch_demo(args):
         mode = VideoMode(w, h, 24)  # 24 : pixel format
         hdmi_out.configure(mode)
         hdmi_out.start()
-    
+
     if args.button_keyboard == "button":
         from input_output.boutons_manager import BoutonsManager
         from pynq.lib import AxiGPIO
@@ -219,149 +220,168 @@ def launch_demo(args):
             else:
                 print("Arg button_keyboard invalid")
             
-            # initialization
-            if clock_main <= number_frame_init:
-                frame = cv_interface.get_copy_captured_image(args.resolution_input)
-                frame = preprocess(frame)
+            if demo_ON:
+                # initialization
+                if clock_main <= number_frame_init:
+                    frame = cv_interface.get_copy_captured_image(args.resolution_input)
+                    frame = preprocess(frame)
 
-                pre_backbone_time = time.time()
-                features = backbone(frame)
-                backbone_time = (time.time() - pre_backbone_time)
-                current_data.add_mean_repr(features)
-                if clock_main == number_frame_init:
-                    current_data.aggregate_mean_rep()
-                    if args.use_saved_sample:
-                        path_sample = args.path_shots_video
-                        compute_and_add_feature_saved_image(backbone, cv_interface, current_data, path_sample)
-                        key = "i"  # simulate press of the key for inference
+                    pre_backbone_time = time.time()
+                    features = backbone(frame)
+                    backbone_time = (time.time() - pre_backbone_time)
+                    current_data.add_mean_repr(features)
+                    if clock_main == number_frame_init:
+                        current_data.aggregate_mean_rep()
+                        if args.use_saved_sample:
+                            path_sample = args.path_shots_video
+                            compute_and_add_feature_saved_image(backbone, cv_interface, current_data, path_sample)
+                            key = "i"  # simulate press of the key for inference
 
-                        print(key)
+                            print(key)
 
-                if key in possible_input:
-                    classe = possible_input.index(key)
-                    last_detected = clock_main * 1  # time.time()
-                
-                cv_interface.draw_headband()
-                cv_interface.put_text("Initialization", 0.2)
+                    if key in possible_input:
+                        classe = possible_input.index(key)
+                        last_detected = clock_main * 1  # time.time()
+                    
+                    cv_interface.draw_headband()
+                    cv_interface.put_text("Initialization", 0.2)
 
-            # if shot acquisition : stop inference and add image
-            # once the key is pressed, the 10 following frames will be saved as snapshot
-            # only the first one will be saved for display
-            if (
-                (key in possible_input or doing_registration)
-                and clock_main > number_frame_init
-                and not do_reset
-            ):
-                do_inference = False
+                # if shot acquisition : stop inference and add image
+                # once the key is pressed, the 10 following frames will be saved as snapshot
+                # only the first one will be saved for display
+                if (
+                    (key in possible_input or doing_registration)
+                    and clock_main > number_frame_init
+                    and not do_reset
+                ):
+                    do_inference = False
 
-                if key in possible_input:
-                    classe = possible_input.index(key)
-                    last_detected = clock_main * 1  # time.time()
+                    if key in possible_input:
+                        classe = possible_input.index(key)
+                        last_detected = clock_main * 1  # time.time()
 
-                frame = cv_interface.get_copy_captured_image(args.resolution_input)
+                    frame = cv_interface.get_copy_captured_image(args.resolution_input)
 
-                if key in possible_input:
-                    # if this is the first frame (ie there was an user input)
-                    cv_interface.add_snapshot(classe)
+                    if key in possible_input:
+                        # if this is the first frame (ie there was an user input)
+                        cv_interface.add_snapshot(classe)
 
-                # add the representation to the class
-                frame = preprocess(frame)
+                    # add the representation to the class
+                    frame = preprocess(frame)
 
-                pre_backbone_time = time.time()
-                features = backbone(frame)
-                backbone_time = (time.time() - pre_backbone_time)
-                current_data.add_repr(classe, features)
+                    pre_backbone_time = time.time()
+                    features = backbone(frame)
+                    backbone_time = (time.time() - pre_backbone_time)
+                    current_data.add_repr(classe, features)
 
-                if abs(clock_main - last_detected) < 10:
-                    doing_registration = True
-                    cv_interface.draw_headband(1.75)
-                    cv_interface.put_text(f"Class : {classe} registered", 0.3)
-                    cv_interface.put_text(f"Number of shots : {cv_interface.get_number_snapshot(classe)}", 0.315, 2)
-                    if(clock_main - last_detected == 0):
-                        print(f"Class : {classe} registered. Number of shots : {cv_interface.get_number_snapshot(classe)}")
-                else:
+                    if abs(clock_main - last_detected) < 10:
+                        doing_registration = True
+                        cv_interface.draw_headband(1.75)
+                        cv_interface.put_text(f"Class : {classe} registered", 0.3)
+                        cv_interface.put_text(f"Number of shots : {cv_interface.get_number_snapshot(classe)}", 0.315, 2)
+                        if(clock_main - last_detected == 0):
+                            print(f"Class : {classe} registered. Number of shots : {cv_interface.get_number_snapshot(classe)}")
+                    else:
+                        doing_registration = False
+
+                # perform inference
+                if do_inference and clock_main > number_frame_init and not do_reset:
+                    frame = cv_interface.get_copy_captured_image(args.resolution_input)
+                    frame = preprocess(frame)
+
+                    pre_backbone_time = time.time()
+                    features = backbone(frame)
+                    backbone_time = (time.time() - pre_backbone_time)
+
+                    (
+                        classe_prediction,
+                        probabilities,
+                    ) = few_shot_model.predict_class_moving_avg(
+                        features,
+                        probabilities,
+                        current_data.get_shot_list(),
+                        current_data.get_mean_features(),
+                    )
+                    cv_interface.draw_headband()
+                    cv_interface.put_text(f"Object is from class : {classe_prediction}", 0.38)
+                    cv_interface.draw_indicator(probabilities)
+
+                # add fps and clock on frame
+                cv_interface.put_fps_clock(fps,clock)
+
+                # update current state
+                # reset action
+                if key == "r":
+                    clock_main = 0
                     doing_registration = False
+                    do_inference = False
+                    current_data.reset()
+                    cv_interface.reset_snapshot()
+                    do_reset = True
 
-            # perform inference
-            if do_inference and clock_main > number_frame_init and not do_reset:
-                frame = cv_interface.get_copy_captured_image(args.resolution_input)
-                frame = preprocess(frame)
+                if do_reset == True and clock_main > number_frame_restart:
+                    do_reset = False
+                    #cv_interface.draw_headband()
+                    #cv_interface.put_text("Reset", 0.09)
+                
+                # Dans la ligne suivante, il faudra enlever le not, je l'ai ajouté pour faire l'inférence
+                if key == "i" and current_data.is_data_recorded():
+                    print("Begining Inference")
+                    do_inference = True
+                    probabilities = None
 
-                pre_backbone_time = time.time()
-                features = backbone(frame)
-                backbone_time = (time.time() - pre_backbone_time)
+                # quit action
+                if key == "q" or (
+                    not (args.max_number_of_frame is None)
+                    and number_image > args.max_number_of_frame
+                ):
+                    # stop simulation if max number of frame is attained
+                    print("Stopping...")
+                    break
 
-                (
-                    classe_prediction,
-                    probabilities,
-                ) = few_shot_model.predict_class_moving_avg(
-                    features,
-                    probabilities,
-                    current_data.get_shot_list(),
-                    current_data.get_mean_features(),
-                )
-                cv_interface.draw_headband()
-                cv_interface.put_text(f"Object is from class : {classe_prediction}", 0.38)
-                cv_interface.draw_indicator(probabilities)
-
-            # add fps and clock on frame
-            cv_interface.put_fps_clock(fps,clock)
-
-            # update current state
-            # reset action
-            if key == "r":
-                clock_main = 0
-                doing_registration = False
-                do_inference = False
-                current_data.reset()
-                cv_interface.reset_snapshot()
-                do_reset = True
-
-            if do_reset == True and clock_main > number_frame_restart:
-                do_reset = False
-                #cv_interface.draw_headband()
-                #cv_interface.put_text("Reset", 0.09)
+                if key == "b":
+                    print("\nTurn off the demo")
+                    clock_main = 0
+                    doing_registration = False
+                    do_inference = False
+                    current_data.reset()
+                    cv_interface.reset_snapshot()
+                    do_reset = True
+                    cv_interface.frame = np.zeros((RES_OUTPUT[1],RES_OUTPUT[0],3),dtype=np.uint8)
+                    clock_main = 0
+                    clock = 0
+                    demo_ON = False
             
-            # Dans la ligne suivante, il faudra enlever le not, je l'ai ajouté pour faire l'inférence
-            if key == "i" and current_data.is_data_recorded():
-                print("Begining Inference")
-                do_inference = True
-                probabilities = None
+                clock_main += 1
+                clock += 1
 
-            # quit action
-            if key == "q" or (
-                not (args.max_number_of_frame is None)
-                and number_image > args.max_number_of_frame
-            ):
-                # stop simulation if max number of frame is attained
-                print("Stopping...")
-                break
+                # outputs
+                if not (args.no_display):
+                    if args.hdmi_display:
+                        # Returns a frame of the appropriate size for the video mode (undefined value)
+                        frame = hdmi_out.newframe()
+                        # get the frame from the cv interface (size is the same since they are specified by  ResOutput)
+
+                        w, h = RES_OUTPUT
+                        pw, ph = PADDING
+                        frame[ph : ph + h, pw : pw + w, :] = cv_interface.frame
+
+                        hdmi_out.writeframe(frame)
+                    else:
+                        cv_interface.show()
+
+                if args.save_video:
+                    frame_to_save = cv_interface.frame
+                    out.write(frame_to_save)
+                total_time = time.time() - initial_time
+                fps = np.round(1 / (total_time),1)
+
+                terminal.log(fps, total_time, frameread_time, backbone_time, probabilities)
             
-            clock_main += 1
-            clock += 1
-
-            # outputs
-            if not (args.no_display):
-                if args.hdmi_display:
-                    # Returns a frame of the appropriate size for the video mode (undefined value)
-                    frame = hdmi_out.newframe()
-                    # get the frame from the cv interface (size is the same since they are specified by  ResOutput)
-
-                    w, h = RES_OUTPUT
-                    pw, ph = PADDING
-                    frame[ph : ph + h, pw : pw + w, :] = cv_interface.frame
-
-                    hdmi_out.writeframe(frame)
-                else:
-                    cv_interface.show()
-
-            if args.save_video:
-                frame_to_save = cv_interface.frame
-                out.write(frame_to_save)
-            total_time = time.time() - initial_time
-            fps = np.round(1 / (total_time),1)
-
-            terminal.log(fps, total_time, frameread_time, backbone_time, probabilities)
+            else:
+                if key == "b":
+                    print("Turn on the demo")
+                    demo_ON = True
 
     finally:
         # close all

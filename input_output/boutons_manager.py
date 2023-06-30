@@ -24,8 +24,7 @@ class BoutonsManager:
         
         local = self.local_button.read()
         external = self.external_button.read()
-        if external==31: #return 0 when the pin are not plug (unplug pin return "11111")
-            external = 0
+
         state = local | external
 
         if state != self.last_state:
@@ -54,6 +53,12 @@ class BoutonsManager:
                     # reset
                     self.key_pressed = "r"
                     print("Now registering class 1")
+                    self.last_state = state
+                    return self.key_pressed
+                
+                if state == 16:
+                    #on/off
+                    self.key_pressed = "b"
                     self.last_state = state
                     return self.key_pressed
 
