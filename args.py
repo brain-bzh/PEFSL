@@ -219,7 +219,7 @@ def parse_args_demonstration(parser):
     )
     demonstration_arguments.add_argument(
         "--button-keyboard",
-        default="button",
+        default="keyboard",
         help="Input device for the button. Can be keyboard (only on computer) or button (only on pynq)",
     )
 
