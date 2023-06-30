@@ -26,7 +26,7 @@ class BackboneOnnxWrapper:
             channel_number == 1
         ), f"got numpy array of shape {batch_image.shape}, with {channel_number} channels, not the correct format (should be B C H W)"
 
-        img = np.transpose(img, (0, 3, 1, 2))  # onnx channel first convention
+        img = np.transpose(batch_image, (0, 3, 1, 2))  # onnx channel first convention
 
         outputs = self.ort_session.run(
             None,

@@ -30,7 +30,7 @@ def evaluate_model(backbone, kwargs: dict):
     # subset of the data if needed
     data = data[0 : kwargs.num_classes, 0 : kwargs.sample_per_class, :, :, :]
 
-    # normalization
+    # normalization (assume the backbone used miniimagnet normalisation during training)
     data = (data / 255 - np.array([0.485, 0.456, 0.406], dtype=data.dtype)) / np.array(
         [0.229, 0.224, 0.225], dtype=data.dtype
     )
@@ -60,10 +60,10 @@ def evaluate_model(backbone, kwargs: dict):
     )
     extracted_shots = features[
         np.stack([classe] * kwargs.n_shots, axis=-1), index_shots
-    ]  # compute features corresponding to each experiment
+    ]  # compute features corresponding to each experiment shots
     extracted_queries = features[
         np.stack([classe] * kwargs.n_queries, axis=-1), index_queries
-    ]  # compute features corresponding to each experiment
+    ]  # compute features corresponding to each experiment queries
 
     mean_feature = np.mean(extracted_shots, axis=(1, 2))
 

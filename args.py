@@ -49,7 +49,7 @@ def parse_evaluation_args(parser):
         help="how many shots per few-shot run",
     )
     eval_group.add_argument(
-        "--n-runs", type=int, default=1000, help="number of few-shot runs"
+        "--n-runs", type=int, default=10000, help="number of few-shot runs"
     )
     eval_group.add_argument(
         "--n-queries", type=int, default=15, help="number of few-shot queries"
