@@ -348,8 +348,8 @@ def launch_demo(args):
                     cv_interface.reset_snapshot()
                     do_reset = True
                     cv_interface.frame = np.zeros((RES_OUTPUT[1],RES_OUTPUT[0],3),dtype=np.uint8)
-                    image = cv2.imread("/home/xilinx/Logo_IMT_Atlantique.png")
-                    cv_interface.display_image(image, 0.5)
+                    #image = cv2.imread("/home/xilinx/Logo_IMT_Atlantique.png")
+                    #cv_interface.display_image(image, 0.5)
                     clock_main = 0
                     clock = 0
                     demo_ON = False
@@ -375,8 +375,9 @@ def launch_demo(args):
                 if args.save_video:
                     frame_to_save = cv_interface.frame
                     out.write(frame_to_save)
+                    
                 total_time = time.time() - initial_time
-                fps = np.round(1 / (total_time),1)
+                fps = np.round(1 / (total_time + 1e-5),1)
 
                 terminal.log(fps, total_time, frameread_time, backbone_time, probabilities)
             
