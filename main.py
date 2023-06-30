@@ -170,11 +170,18 @@ def launch_demo(args):
         mode = VideoMode(w, h, 24)  # 24 : pixel format
         hdmi_out.configure(mode)
         hdmi_out.start()
- 
+    
     if args.button_keyboard == "button":
         from input_output.boutons_manager import BoutonsManager
+        from pynq.lib import AxiGPIO
 
-        btn_manager = BoutonsManager(args.overlay.btns_gpio)
+        axi_gpio_design = args.overlay
+        btns_gpio_dict = axi_gpio_design.ip_dict['btns_gpio']
+
+        local_button = AxiGPIO(btns_gpio_dict).channel1 #GPIO
+        external_button = AxiGPIO(btns_gpio_dict).channel2 #GPIO2
+
+        btn_manager = BoutonsManager(local_button, external_button)
     
     if args.save_video:
         fourcc = cv2.VideoWriter_fourcc(*"XVID")
@@ -312,8 +319,8 @@ def launch_demo(args):
 
             if do_reset == True and clock_main > number_frame_restart:
                 do_reset = False
-                cv_interface.draw_headband()
-                cv_interface.put_text("Reset", 0.09)
+                #cv_interface.draw_headband()
+                #cv_interface.put_text("Reset", 0.09)
             
             # Dans la ligne suivante, il faudra enlever le not, je l'ai ajouté pour faire l'inférence
             if key == "i" and current_data.is_data_recorded():
@@ -329,7 +336,7 @@ def launch_demo(args):
                 # stop simulation if max number of frame is attained
                 print("Stopping...")
                 break
-                
+            
             clock_main += 1
             clock += 1
 

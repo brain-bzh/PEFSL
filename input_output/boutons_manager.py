@@ -10,17 +10,23 @@ class BoutonsManager:
     Si aucun pouton n'a été pressé, change_state renvoie "NO_KEY_PRESSED"
     """
 
-    def __init__(self, boutons_gpio):
+    def __init__(self, local_button, external_button):
         """
         button gpio : btns_gpio attribute of the overlay
         see : https://pynq.readthedocs.io/en/v2.0/pynq_libraries/axigpio.html
         """
-        self.boutons_gpio = boutons_gpio
+        self.local_button = local_button
+        self.external_button = external_button
         self.key_pressed = "1"
         self.last_state = 0
 
     def change_state(self):
-        state = self.boutons_gpio.read()
+        
+        local = self.local_button.read()
+        external = self.external_button.read()
+        if external==31: #return 0 when the pin are not plug (unplug pin return "11111")
+            external = 0
+        state = local | external
 
         if state != self.last_state:
             if state != 0:
@@ -47,9 +53,7 @@ class BoutonsManager:
                 if state == 8:
                     # reset
                     self.key_pressed = "r"
-                    print(
-                        "Now registering class 1"
-                    )
+                    print("Now registering class 1")
                     self.last_state = state
                     return self.key_pressed
 
