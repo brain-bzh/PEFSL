@@ -229,7 +229,7 @@ if {[string equal [get_filesets -quiet constrs_1] ""]} {
 set obj [get_filesets constrs_1]
 
 # Add/Import constrs file and set constrs file properties
-set file "[file normalize ${origin_dir}/l23gauth/PEFSL/vivado_project/base/base.srcs/constrs_1/imports/constraints/base.xdc]"
+set file "[file normalize ${origin_dir}/base.srcs/constrs_1/imports/constraints/base.xdc]"
 set file_imported [import_files -fileset constrs_1 [list $file]]
 set file "constraints/base.xdc"
 set file_obj [get_files -of_objects [get_filesets constrs_1] [list "*$file"]]
