@@ -348,6 +348,8 @@ def launch_demo(args):
                     cv_interface.reset_snapshot()
                     do_reset = True
                     cv_interface.frame = np.zeros((RES_OUTPUT[1],RES_OUTPUT[0],3),dtype=np.uint8)
+                    image = cv2.imread("/home/xilinx/Logo_IMT_Atlantique.png")
+                    cv_interface.display_image(image, 0.5)
                     clock_main = 0
                     clock = 0
                     demo_ON = False

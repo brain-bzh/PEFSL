@@ -4,6 +4,49 @@ manage the graphical interface and camera for the demo
 import cv2
 import numpy as np
 
+def display_img(frame, image, scale, position="ctr/ctr"):
+    """Args :
+        frame : frame where display the image
+        image : image to display
+        scale (0<_<1): scale compared to the frame (1=same size as the frame / 0.5=half the frame)
+        position "pos1/pos2": top, btm, ctr, rgt, lft"""
+    HEIGHT, WIDTH, _ = frame.shape
+    height = int(scale*HEIGHT)
+    width = int(scale*WIDTH)
+    image = cv2.resize(image, (width, height), interpolation=cv2.INTER_LINEAR)
+
+    image_shift = int(0.05*WIDTH)
+    pos1, pos2 = tuple(map(str,position.split('/')))
+
+    if pos1=="top":
+        y_start = image_shift
+        if pos2=="lft":
+            x_start = image_shift
+        if pos2=="ctr":
+            x_start = WIDTH//2 - width//2
+        if pos2=="rgt":
+            x_start = WIDTH - image_shift - width
+    if pos1=="ctr":
+        y_start = HEIGHT//2 - height//2
+        if pos2=="lft":
+            x_start = image_shift
+        if pos2=="ctr":
+            x_start = WIDTH//2 - width//2
+        if pos2=="rgt":
+            x_start = WIDTH - image_shift - width
+    if pos1=="btm":
+        y_start = HEIGHT-image_shift
+        if pos2=="lft":
+            x_start = image_shift
+        if pos2=="ctr":
+            x_start = WIDTH//2 - width//2
+        if pos2=="rgt":
+            x_start = WIDTH - image_shift - width
+
+    x_end = x_start + width
+    y_end = y_start + height  
+    
+    frame[y_start:y_end, x_start:x_end] = image
 
 def draw_indic2(frame, percentages, shot_frames, font, font_scale, font_thickness):
     def percentage_to_color(p):
@@ -217,6 +260,14 @@ class OpencvInterface:
         else:
             raise Exception("original frame is not available")
     
+    def display_image(self, image, scale, position="ctr/ctr"):
+        """
+        wrapper of display_img
+        """
+        self.is_present_original_frame = False
+        display_img(self.frame, image, scale, position)
+
+
     def draw_indicator(self, probabilities):
         """
         wrapper of draw_indic
