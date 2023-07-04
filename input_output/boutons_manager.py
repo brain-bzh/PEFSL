@@ -24,6 +24,8 @@ class BoutonsManager:
         
         local = self.local_button.read()
         external = self.external_button.read()
+        if external==31: # in case of no pin are connected
+            external = 0
 
         state = local | external
 
