@@ -137,7 +137,7 @@ def parse_model_params(parser):
 
     pynq_parser.add_argument(
         "--path_tmodel",
-        default="/home/xilinx/package_demo/resnet9_fm16_32x32_onnx_custom_perf.tmodel",
+        default="/home/xilinx/resnet9_strided_16fmaps_onnx_custom_perf.tmodel",
         type=str,
         help="path of the tmodel. The tprog and tdata should be in the same folder",
     )
@@ -149,7 +149,7 @@ def parse_model_params(parser):
 
     onnx_parser.add_argument(
         "--path-onnx",
-        default="weight/resnet12_32_32_64.onnx",
+        default="resnet9_strided_16fmaps.onnx",
         type=str,
         help="path of the .onnx file. Input image resolution should match the resolution of the model",
     )
