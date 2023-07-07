@@ -14,8 +14,8 @@ class TorchBatchModelWrapper:
     Wrapps a torch model to input/output ndarray
     """
 
-    def __init__(self, model_name: Union[str, os.PathLike], weights, device="cpu"):
-        self.model = get_model(model_name, weights, device=device)
+    def __init__(self, model_name: Union[str, os.PathLike], weights, use_strides, device="cpu"):
+        self.model = get_model(model_name, weights, use_strides, device=device)
         self.device = device
 
     def __call__(self, batch_img: np.ndarray):

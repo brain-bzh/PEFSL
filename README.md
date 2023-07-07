@@ -69,7 +69,7 @@ A repository is available to train a model with pytorch: https://github.com/anto
 
 The script used to convert the model to onnx is [model_to_onnx.py](model_to_onnx.py). Examples to export backbone from other repository is available in the doctumentation of the file. In order to be exported with this script, the networks must be implemented in the demo. Look at [backbone_loader/backbone_pytorch/model.py](backbone_loader/backbone_pytorch/model.py) for a list of supported models. Thus, for the aforementioned models:
 ```bash
-    python3 model_to_onnx.py --input-resolution 32 --save-name resnet12 --backbone "resnet12"  --input-model resnet12.pt
+    python3 model_to_onnx.py --input-resolution 32 --save-name resnet9_strided_16fmaps --backbone "resnet9"  --input-model resnet9_strided_16fmaps.pt
 ```
 Weights available [on this link](https://drive.google.com/drive/folders/1ftzFL3Byidmls2zS0OdhVA2FBBb2krQR?usp=share_link).
 

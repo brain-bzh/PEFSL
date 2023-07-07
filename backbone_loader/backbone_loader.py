@@ -1,5 +1,5 @@
 """
-get the backbone with the specified framework, using argument from 
+get the backbone with the specified framework, using argument from
 
 -> input : numpy or torch tensor img (preprocessed)
 -> output : numpy img
@@ -24,7 +24,8 @@ def get_model(model_specs: dict):
         device = model_specs["device"]
         model_name = model_specs["model_name"]
         weight = model_specs["weight"]
-        return TorchBatchModelWrapper(model_name, weight, device=device)
+        use_strides = model_specs["use_strides"]
+        return TorchBatchModelWrapper(model_name, weight, use_strides, device=device)
     elif model_specs["type"] == "tensil":
         from backbone_loader.backbone_tensil import BackboneTensilWrapper
 

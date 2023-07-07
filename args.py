@@ -113,9 +113,17 @@ def parse_model_params(parser):
     )
     pytorch_parser.add_argument(
         "--backbone-type",
-        default="brain_resnet9_fm16_strided",
+        default="resnet9",
         help=" specify the model used (wich pytorch description should be used, see backbone_loader/backbone_pytorch/model for a list)",
     )
+
+    pytorch_parser.add_argument(
+        "--no-strides",
+        action="store_true",
+        help="if you want to use maxpooling instead of strides",
+        default=False
+    )
+
 
     # only usefull for the pynk
     pynq_parser = framework_submodules.add_parser(
@@ -239,6 +247,7 @@ def process_arguments(args):
             "type": args.framework_backbone,
             "device": args.device_pytorch,
             "model_name": args.backbone_type,
+            "use_strides": not args.no_strides,
         }
 
         # weights hardcoded path convinience
