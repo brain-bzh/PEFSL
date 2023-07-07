@@ -72,7 +72,7 @@ A repository is available to train a model with pytorch: https://github.com/anto
 
 The script used to convert the model to onnx is [model_to_onnx.py](model_to_onnx.py). Examples to export backbone from other repository is available in the doctumentation of the file. In order to be exported with this script, the networks must be implemented in the demo. Look at [backbone_loader/backbone_pytorch/model.py](backbone_loader/backbone_pytorch/model.py) for a list of supported models. Thus, for the aforementioned models:
 ```bash
-    python3 model_to_onnx.py --input-resolution 32 --save-name "small-strides-resnet9" --model-type "brain_resnet9_tiny_strided" --model-specification "resnet9_strided_16fmaps.pt"
+    python3 model_to_onnx.py --input-resolution 32 --save-name "small-strides-resnet9" --model-type "brain_resnet9_fm16_strided" --model-specification "resnet9_strided_16fmaps.pt"
 ```
 Weights available [on this link](https://drive.google.com/drive/folders/1ftzFL3Byidmls2zS0OdhVA2FBBb2krQR?usp=share_link).
 
@@ -113,40 +113,6 @@ The output files that you will need after the bitstream generation are the follo
 - `base.gen/base/sources_1/bd/base/hw_handoff/base.hwh`
 
 Rename them to respectively to `design.bit` and `design.hwh` and copy them to the PYNQ.
-
-# other setup :
-## Performance evaluation on the dataset cifar-10
-It is possible to test the performance of the model on cifar 10 on PYNQ (only 32x32 networks). Download CIFAR 10 dataset and put the test set binary file (cifar-10-batches-py/test_batch) in the pynq and run the following command :
-```bash
-sudo -E python3 few_shot_evaluation.py --dataset-path /home/xilinx/cifar-10-batches-py/test_batch  tensil --path_tmodel /home/xilinx/resnet9_strided_16fmaps_onnx_custom_perf.tmodel --path_bit /home/xilinx/design.bit
-```
-## test of the performance of the demonstration
-
-You may have problem setting up the hdmi output/ input from camera, and want to verify that the demonstration is running well. In order to do that, setup a video simulation of the demo :
-
-1. download a video and put it in this repo.
-2. put reference images inside a folder with the folowing structure :
-    -folder
-        -class1_name
-        -class2_name
-3. add the path as argument when you call the function
-
-exemple :
-```bash
-sudo -E python3 main.py --no-display --use-saved-sample --path_shots_video data/catvsdog --camera-specification catvsdog.mp4 tensil --path_tmodel /home/xilinx/resnet9_strided_16fmaps_onnx_custom_perf.tmodel --path_bit /home/xilinx/design.bit
-```
-
-Get the argument specific to main.py :
-
-```bash
-python3 main.py --help
-```
-
-Get the argument specific to tensil:
-
-```bash
-python3 main.py tensil --help
-```
 
 # Possible pitfalls :
     - Sometimes there is a bug with memory allocation (an error is raised). We are investigating it. For now if it happens, just reset the PYNQ.
