@@ -133,7 +133,7 @@ def launch_demo(args):
     few_shot_model = FewShotModel(args.classifier_specs)
 
     # data holding variables
-    possible_input_keyboard = [chr(i % 128) for i in range(49, 57)]
+    possible_input_keyboard = [chr(i) for i in range(49, 58)]
     possible_input_pynq = ["1", "2", "3", "4"]
 
     class_num = len(possible_input_keyboard)
