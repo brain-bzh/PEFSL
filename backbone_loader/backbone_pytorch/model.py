@@ -5,13 +5,13 @@ Keys of EASY_SPECS/BRAIN_RESNET12_SPECS/BRAIN_RESNET9_SPECS : name of the implem
 attrributes : keywords arguments passed to the corresponding model
 
 available models :
-EASY : 
+EASY :
 easy_resnet12_small, easy_resnet12, easy_resnet12_tiny
-BRAIN : 
+BRAIN :
 
 resnet9 :
-"brain_resnet9_small", "brain_resnet9", "brain_resnet9_tiny", "brain_resnet9_small_strided", "brain_resnet9_strided", 
-"brain_resnet9_tiny_strided", 
+"brain_resnet9_small", "brain_resnet9", "brain_resnet9_tiny", "brain_resnet9_small_strided", "brain_resnet9_strided",
+"brain_resnet9_tiny_strided",
 
 resnet12 :
 "brain_resnet12_small", "brain_resnet12", "brain_resnet12_tiny", "brain_resnet12_small_strided"
@@ -91,6 +91,10 @@ BRAIN_RESNET9_SPECS = {
     },
     "brain_resnet9_tiny_strided": {
         "feature_maps": 32,
+        "use_strides": True,
+    },
+    "brain_resnet9_fm16_strided": {
+        "feature_maps": 16,
         "use_strides": True,
     },
 }

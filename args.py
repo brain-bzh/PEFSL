@@ -113,7 +113,7 @@ def parse_model_params(parser):
     )
     pytorch_parser.add_argument(
         "--backbone-type",
-        default="easy_resnet12",
+        default="brain_resnet9_fm16_strided",
         help=" specify the model used (wich pytorch description should be used, see backbone_loader/backbone_pytorch/model for a list)",
     )
 
@@ -192,7 +192,7 @@ def parse_args_demonstration(parser):
     demonstration_arguments.add_argument(
         "--hdmi-display",
         action="store_true"
-    )    
+    )
     demonstration_arguments.add_argument(
         "--video-format",
         type=str,
@@ -202,7 +202,7 @@ def parse_args_demonstration(parser):
     demonstration_arguments.add_argument(
         "--max_number_of_frame",
         type=int
-    )    
+    )
     demonstration_arguments.add_argument(
         "--use-saved-sample",
         action="store_true",

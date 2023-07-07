@@ -122,7 +122,7 @@ def launch_demo(args):
     # --------------------------------------
 
     RES_OUTPUT = tuple(map(int,args.output_resolution.split('x')))
-    
+
     FONT_SCALE = 0.001*RES_OUTPUT[0]
     FONT_THICKNESS = int(np.round(0.0025*RES_OUTPUT[0]))
     PADDING = tuple(args.padding)
@@ -133,7 +133,7 @@ def launch_demo(args):
     few_shot_model = FewShotModel(args.classifier_specs)
 
     # data holding variables
-    possible_input_keyboard = [chr(i) for i in range(177, 185)]
+    possible_input_keyboard = [chr(i % 128) for i in range(49, 57)]
     possible_input_pynq = ["1", "2", "3", "4"]
 
     class_num = len(possible_input_keyboard)
@@ -184,7 +184,7 @@ def launch_demo(args):
         external_button = AxiGPIO(btns_gpio_dict).channel2 #GPIO2
 
         btn_manager = BoutonsManager(local_button, external_button)
-    
+
     if args.save_video:
         fourcc = cv2.VideoWriter_fourcc(*"XVID")
         out = cv2.VideoWriter("output.avi", fourcc, 30.0, RES_OUTPUT)
@@ -209,7 +209,7 @@ def launch_demo(args):
                 print("failed to get next image")
                 exit(1)
             frameread_time = time.time() - initial_time
-            
+
             # keyboard/button input
             if args.button_keyboard == "keyboard":
                 key = cv_interface.get_key()
@@ -220,7 +220,7 @@ def launch_demo(args):
                 possible_input = possible_input_pynq
             else:
                 print("Arg button_keyboard invalid")
-            
+
             if demo_ON:
                 # initialization
                 if clock_main <= number_frame_init:
@@ -243,7 +243,7 @@ def launch_demo(args):
                     if key in possible_input:
                         classe = possible_input.index(key)
                         last_detected = clock_main * 1  # time.time()
-                    
+
                     cv_interface.draw_headband()
                     cv_interface.put_text("Initialization", 0.2)
 
@@ -324,7 +324,7 @@ def launch_demo(args):
                     do_reset = False
                     #cv_interface.draw_headband()
                     #cv_interface.put_text("Reset", 0.09)
-                
+
                 # Dans la ligne suivante, il faudra enlever le not, je l'ai ajouté pour faire l'inférence
                 if key == "i" and current_data.is_data_recorded():
                     print("Begining Inference")
@@ -354,7 +354,7 @@ def launch_demo(args):
                     clock_main = 0
                     clock = 0
                     demo_ON = False
-            
+
                 clock_main += 1
                 clock += 1
 
@@ -376,12 +376,12 @@ def launch_demo(args):
                 if args.save_video:
                     frame_to_save = cv_interface.frame
                     out.write(frame_to_save)
-                    
+
                 total_time = time.time() - initial_time
                 fps = np.round(1 / (total_time + 1e-5),1)
 
                 terminal.log(fps, total_time, frameread_time, backbone_time, probabilities)
-            
+
             else:
                 if key == "b":
                     print("Turn on the demo")
