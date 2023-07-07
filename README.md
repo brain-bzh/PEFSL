@@ -50,10 +50,7 @@ Button 3: reset the demo
 
 
 # How to install and run the demo on your computer
-It is also possible to run the demo on your computer using onnx. Example weights are also available [on this link](https://drive.google.com/file/d/1u2a_PXEhzabauGSO_mkPQRekgvphM5L8/view?usp=sharing) under the name `resnet9_strided_16fmaps.onnx`. In order to run the demo using onnx :
-
-using pytorch backbone :
-(checkout [python file](backbone_loader/backbone_pytorch/model.py) for implemented models name) (backbone weight must match backbone type)
+It is also possible to run the demo on your computer using onnx. Example weights are also available [on this link](https://drive.google.com/file/d/1u2a_PXEhzabauGSO_mkPQRekgvphM5L8/view?usp=sharing) under the name `resnet9_strided_16fmaps.pt`:
 ```bash
 python3 main.py pytorch --device-pytorch cpu --path-pytorch-weight resnet9_strided_16fmaps.pt
 ```
