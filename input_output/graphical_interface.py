@@ -3,16 +3,19 @@ manage the graphical interface and camera for the demo
 """
 import cv2
 import numpy as np
+import time
 
 def percentage_to_color(p):
     return 0,255 - (255 * p), 255 * p
 
 def display_img(frame, image, scale, position="ctr/ctr"):
-    """Args :
+    """
+    Args :
         frame : frame where display the image
         image : image to display
         scale (0<_<1): scale compared to the frame (1=same size as the frame / 0.5=half the frame)
-        position "pos1/pos2": top, btm, ctr, rgt, lft"""
+        position "pos1/pos2": top, btm, ctr, rgt, lft
+    """
     HEIGHT, WIDTH, _ = frame.shape
     height = int(scale*HEIGHT)
     width = int(scale*WIDTH)
@@ -50,6 +53,7 @@ def display_img(frame, image, scale, position="ctr/ctr"):
     y_end = y_start + height  
     
     frame[y_start:y_end, x_start:x_end] = image
+
 
 class OpencvInterface:
     """
@@ -128,9 +132,7 @@ class OpencvInterface:
         """
         Draw indicator : draw shots, probability and level bar for each class
         """
-        
-        percentages = probabilities  # not clean,
-        print(percentages)
+
         ###PARAMETERS###
         #shot_frames
         shot_width = self.shot_width
@@ -156,7 +158,7 @@ class OpencvInterface:
         y_start = self.headband_height + self.bloc_gap + shot_gap
         y_end = self.headband_height + self.bloc_gap + shot_gap + shot_height
 
-        for k in range(len(percentages)):
+        for k in range(len(probabilities)):
             images = self.snapshot[k]
             if images == []:
                 self.ERROR = True
@@ -175,7 +177,7 @@ class OpencvInterface:
                 #draw level
                 x_start = x_end - shot_shift + shot_gap
                 y_start = y_end - shot_shift
-                level_max = int(percentages[k] * level_bar_height)
+                level_max = int(probabilities[k] * level_bar_height)
                 for lvl in range(level_max):
                     level_start = (x_start , y_start - lvl)
                     level_end = (x_start + level_bar_width , y_start - (lvl+1))
@@ -184,7 +186,7 @@ class OpencvInterface:
                 x_start = x_start + shot_gap + level_bar_width
                 y_start = y_start
                 percentage_origin = (x_start , y_start)
-                cv2.putText(self.frame,f"{int(np.round(100*percentages[k].item()))}%",percentage_origin,self.font,font_percentage_scale,(0, 0, 255),font_percentage_thickness,cv2.LINE_AA)
+                cv2.putText(self.frame,f"{int(np.round(100*probabilities[k].item()))}%",percentage_origin,self.font,font_percentage_scale,(0, 0, 255),font_percentage_thickness,cv2.LINE_AA)
                 #update position for the next class
                 x_start = self.bloc_gap + shot_gap
                 x_end = x_start + shot_width
@@ -298,9 +300,9 @@ class Timer:
     For example : 
                     T.tic() # instantaneous time
                     frame = preprocess(frame)
-                    T.toc("PREPROCESS") # calculation the duration of preprocess() and save the value in the dictionary as "PREPROCESS"
+                    T.toc("PREPROCESS") # calculate the duration of preprocess() and save the value in the dictionary as "PREPROCESS"
                     features = backbone(frame)
-                    T.toc("BACKBONE") calculation the duration of backbone() and save the value in the dictionary as "PREPROCESS"
+                    T.toc("BACKBONE") # calculate the duration of backbone() and save the value in the dictionary as "PREPROCESS"
     """
     def __init__(self,period=0.1):
         self.period = period

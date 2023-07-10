@@ -28,20 +28,16 @@ class DataFewShot:
         """
         self.is_recorded = True
         if classe not in self.registered_classes:
-            if len(self.registered_classes) == 0:
-                last_class = -1
-            else:
-                last_class = self.registered_classes[-1]
-            assert (
-                classe == last_class + 1
-            ), "only integer class supported with increasing index"
-            self.registered_classes.append(classe)
-            self.shot_list.append(repr)
-
+            try :
+                self.registered_classes.append(classe)
+                self.shot_list.append(repr)
+            except:
+                print("",end="")
         else:
-            self.shot_list[classe] = np.concatenate(
-                (self.shot_list[classe], repr), axis=0
-            )
+            try:
+                self.shot_list[classe] = np.concatenate((self.shot_list[classe], repr), axis=0)
+            except:
+                print("",end="")
 
     def get_shot_list(self):
         """

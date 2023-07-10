@@ -1,4 +1,4 @@
-class BoutonsManager:
+class ButtonsManager:
     """
     La classe boutons renvoie grâce à la méthode change_state, la touche du clavier qui aurait
     été tappée si au lieu des boutons nous avions utiliser un clavier.
@@ -10,43 +10,47 @@ class BoutonsManager:
     Si aucun pouton n'a été pressé, change_state renvoie "NO_KEY_PRESSED"
     """
 
-    def __init__(self, local_button, external_button):
+    def __init__(self, pynq_button, external_button, nb_class_max):
         """
         button gpio : btns_gpio attribute of the overlay
         see : https://pynq.readthedocs.io/en/v2.0/pynq_libraries/axigpio.html
         """
-        self.local_button = local_button
+        self.pynq_button = pynq_button
         self.external_button = external_button
+        self.nb_class_max = nb_class_max
+        self.last_class = 0
+        self.reach_max = False
         self.key_pressed = "1"
-        self.last_state = 0
 
     def change_state(self):
         
-        local = self.local_button.read()
+        pynq = self.pynq_button.read()
         external = self.external_button.read()
-        if external==31: # in case of no pin are connected
+        if external==31:
             external = 0
 
-        state = local | external
+        state = pynq | external
 
         if state != self.last_state:
             if state != 0:
                 if state == 1:
-                    # prendre une image
-                    if self.key_pressed == "r":
-                        self.key_pressed = "1"
+                    # take a shot of the current class
                     self.last_state = state
                     return self.key_pressed
 
                 if state == 2:
-                    # changer de classe
-                    self.key_pressed = str(int(self.key_pressed) + 1)
-                    print("Now registering class: " + self.key_pressed)
+                    # change class
+                    if int(self.key_pressed) >= self.nb_class_max:
+                        print(" Maximum class reached.")
+                        self.reach_max = True
+                    else:
+                        print(" Now registering class " + self.key_pressed + ".", end='')
+                        self.key_pressed = str(int(self.key_pressed) + 1)
                     self.last_state = state
                     return self.key_pressed
 
                 if state == 4:
-                    # faire l'inference
+                    # do inference
                     self.key_pressed = "i"
                     self.last_state = state
                     return self.key_pressed
@@ -54,19 +58,24 @@ class BoutonsManager:
                 if state == 8:
                     # reset
                     self.key_pressed = "r"
-                    print("Now registering class 1")
                     self.last_state = state
                     return self.key_pressed
                 
                 if state == 16:
-                    #on/off
-                    self.key_pressed = "b"
+                    # pause (on/off)
+                    self.key_pressed = "p"
+                    self.last_state = state
+                    return self.key_pressed
+                
+                if state == 32:
+                    # quit
+                    self.key_pressed = "q"
                     self.last_state = state
                     return self.key_pressed
 
-            self.last_state = state
-        return "NO_KEY_PRESSED"
 
+
+        return "NO_KEY_PRESSED"
     
     def change_state2(self,key):
         
@@ -138,22 +147,3 @@ class BoutonsManager:
         self.key_pressed = "1"
         self.last_state = 0
         self.reach_max = False
-
-
-if __name__ == "__main__":
-    # test the bouton
-    import time
-    import numpy as np
-    import pynq
-    from pynq import Overlay
-    from tcu_pynq.driver import Driver
-    from tcu_pynq.architecture import pynqz1
-    import sys  # TODO : à supprimer
-
-    sys.path.append("/home/xilinx")
-
-    overlay = Overlay("/home/xilinx/jupyter_notebooks/l20leche/base_tensil_hdmi.bit")
-    btns = BoutonsManager(overlay.btns_gpio)
-    while True:
-        time.sleep(1)
-        print(btns.change_state())
