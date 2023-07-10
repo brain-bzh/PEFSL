@@ -126,6 +126,7 @@ def launch_demo(args):
     FONT_SCALE = 0.001*RES_OUTPUT[0]
     FONT_THICKNESS = int(np.round(0.0025*RES_OUTPUT[0]))
     PADDING = tuple(args.padding)
+    GSCALE = 1 # General scale (=1 for the pynq screen)
     if FONT_THICKNESS==0:
         FONT_THICKNESS = 1
 
@@ -136,8 +137,8 @@ def launch_demo(args):
     possible_input_keyboard = [chr(i % 128) for i in range(49, 57)]
     possible_input_pynq = ["1", "2", "3", "4"]
 
-    class_num = len(possible_input_keyboard)
-    current_data = DataFewShot(class_num)
+    nb_class_max = len(possible_input_keyboard)
+    current_data = DataFewShot(nb_class_max)
 
     # program related constant
     do_inference = False
@@ -163,7 +164,7 @@ def launch_demo(args):
         # cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
     # cv_interface manage graphical manipulation
     # TODO : add input/output to serparate class and use with statement
-    cv_interface = OpencvInterface(cap, RES_OUTPUT, FONT, FONT_SCALE, FONT_THICKNESS, class_num)
+    cv_interface = OpencvInterface(cap, RES_OUTPUT,GSCALE, FONT, nb_class_max)
 
     if args.hdmi_display:
         from pynq.lib.video import VideoMode
