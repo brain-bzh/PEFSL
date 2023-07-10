@@ -278,3 +278,81 @@ class OpencvInterface:
         if a key was pressed, get the key
         """
         return cv2.waitKey(33) & 0xFF
+
+
+
+def ms(value,width):
+        return '{:^{width}.2f}'.format(1000*value,width=width)
+
+class Timer:
+    """
+    Class to display timers on the terminal
+    Easy to use :
+        - columns : a dictionary in which keys and values will be display on the terminal 
+        - tic() : save instantaneous time. If init = True, save initial time
+        - toc(step) : save the duration since tic() and associate with the step in the dictionary "columns". Save also instantaneous time like tic().
+                      If end = true, calculate and save total time
+        - timer() : display the dictionary on the terminal, i.e. texts and associate values in ms
+        - fps_() : calculate and save fps
+        - reset() : reset of Timer
+    For example : 
+                    T.tic() # instantaneous time
+                    frame = preprocess(frame)
+                    T.toc("PREPROCESS") # calculation the duration of preprocess() and save the value in the dictionary as "PREPROCESS"
+                    features = backbone(frame)
+                    T.toc("BACKBONE") calculation the duration of backbone() and save the value in the dictionary as "PREPROCESS"
+    """
+    def __init__(self,period=0.1):
+        self.period = period
+        self.columns = {"FPS":0,"TOTAL TIME (ms)":0}
+        self.saved_columns = {"FPS":0,"TOTAL TIME (ms)":0}
+        self.time = time.time()
+        self.wait = time.time()
+        self.initial_time = 0
+        self.total_time = 0
+        self.fps = 0
+        self.display = True
+        self.ON = True
+
+    def timer(self):
+        if self.ON:
+            if self.display:
+                self.display = False
+                print("|",end="")
+                for txt in self.columns:
+                    print(" ",txt," |",end="")
+                print("")
+            if(time.time() - self.wait > self.period):
+                self.wait = time.time()
+                print("\r",end="")
+                print("|",end="")
+                for txt in self.columns:
+                    l1 = len(txt)+4 #length of texts
+                    print(ms(self.columns[txt],width=l1),end="")
+                    print("|",end="")
+    
+    def tic(self,init=False):
+        self.time = time.time()
+        if init:
+            self.initial_time = time.time()
+
+    def toc(self,step,end=False):
+        if not end:
+            self.columns[step] = time.time() - self.time
+        else:
+            self.total_time = time.time() - self.initial_time
+            self.columns[step] = self.total_time
+        self.time = time.time()
+
+    def fps_(self):
+        self.fps = 1/(1000*self.total_time)
+    
+    def reset(self):
+        self.columns = self.saved_columns.copy()
+        self.time = time.time()
+        self.wait = time.time()
+        self.initial_time = 0
+        self.total_time = 0
+        self.fps = 0
+        self.display = True
+        self.ON = True
