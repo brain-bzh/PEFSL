@@ -134,7 +134,7 @@ def launch_demo(args):
     few_shot_model = FewShotModel(args.classifier_specs)
 
     # data holding variables
-    possible_input_keyboard = [chr(i % 128) for i in range(49, 57)]
+    possible_input_keyboard = [chr(i+49) for i in range(10)]
     possible_input_pynq = ["1", "2", "3", "4"]
 
     nb_class_max = len(possible_input_keyboard)
@@ -175,16 +175,25 @@ def launch_demo(args):
         hdmi_out.start()
 
     if args.button_keyboard == "button":
-        from input_output.boutons_manager import BoutonsManager
+        from input_output.boutons_manager import ButtonsManager
         from pynq.lib import AxiGPIO
-
         axi_gpio_design = args.overlay
         btns_gpio_dict = axi_gpio_design.ip_dict['btns_gpio']
-
-        local_button = AxiGPIO(btns_gpio_dict).channel1 #GPIO
+        pynq_button = AxiGPIO(btns_gpio_dict).channel1 #GPIO
         external_button = AxiGPIO(btns_gpio_dict).channel2 #GPIO2
-
-        btn_manager = BoutonsManager(local_button, external_button)
+        possible_input = possible_input_pynq
+        nb_class_max = len(possible_input)
+        btn_manager = ButtonsManager(pynq_button, external_button, nb_class_max)
+    elif args.button_keyboard == "keyboard":
+        possible_input = possible_input_keyboard
+        nb_class_max = len(possible_input)
+    elif args.button_keyboard == "keyboard_button":
+        from input_output.boutons_manager import ButtonsManager
+        possible_input = possible_input_pynq
+        nb_class_max = len(possible_input)
+        btn_manager = ButtonsManager(None, None, nb_class_max)
+    else:
+        print("Arg button_keyboard invalid")
 
     if args.save_video:
         fourcc = cv2.VideoWriter_fourcc(*"XVID")
