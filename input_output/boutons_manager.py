@@ -18,6 +18,7 @@ class ButtonsManager:
         self.pynq_button = pynq_button
         self.external_button = external_button
         self.nb_class_max = nb_class_max
+        self.last_state = 0
         self.last_class = 0
         self.reach_max = False
         self.key_pressed = "1"
@@ -73,7 +74,7 @@ class ButtonsManager:
                     self.last_state = state
                     return self.key_pressed
 
-
+            self.last_state = state
 
         return "NO_KEY_PRESSED"
     
