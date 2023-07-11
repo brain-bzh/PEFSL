@@ -125,7 +125,7 @@ def parse_model_params(parser):
     )
 
 
-    # only usefull for the pynk
+    # only usefull for the pynq
     pynq_parser = framework_submodules.add_parser(
         "tensil", help="pynq specific arguments"
     )
@@ -172,6 +172,12 @@ def parse_args_demonstration(parser):
         type=str,
         default="0",
         help="specification of the camera. 0 for the first camera, 1 for the second, etc. If you want to use a video file, specify the path of the video file instead.",
+    )
+    demonstration_arguments.add_argument(
+        "--camera-resolution",
+        type=str,
+        default="640x480",
+        help="Camera resolution. Must be 16:9 and less or equal to resolution max",
     )
     demonstration_arguments.add_argument(
         "--output-resolution",

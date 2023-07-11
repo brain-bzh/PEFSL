@@ -39,10 +39,9 @@ def preprocess(img, dtype=np.float32):
 
 
 def launch_demo(args):
-    """
-    initialize the variable and launch the demo
-    """
+    ####################################
     ###------# INITIALIZATION #------###
+    ####################################
     RES_HDMI = (600, 800)  # width height
     RES_OUTPUT = tuple(map(int,args.output_resolution.split('x')))
     FONT = cv2.FONT_HERSHEY_SIMPLEX
@@ -91,7 +90,7 @@ def launch_demo(args):
     elif args.button_keyboard == "keyboard":
         possible_input = possible_input_keyboard
         nb_class_max = len(possible_input)
-    elif args.button_keyboard == "keyboard_button":
+    elif args.button_keyboard == "keyboard-button":
         from input_output.boutons_manager import ButtonsManager
         possible_input = possible_input_pynq
         nb_class_max = len(possible_input)
@@ -99,10 +98,23 @@ def launch_demo(args):
     else:
         print("Arg button_keyboard invalid")
     
-    # Interfaces
+    # Terminal Interface
     T = Timer()
+    # Camera
     cap = cv2.VideoCapture(args.camera_specification)
-    cv_interface = OpencvInterface(cap, RES_OUTPUT,GSCALE, FONT, nb_class_max)
+    cam_width_max = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
+    cam_height_max = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
+    cam_width, cam_height = map(int,args.camera_resolution.split('x'))
+    print(int(cam_width_max),"x",int(cam_height_max))
+    if cam_width_max == 0 or cam_height_max == 0:
+        raise "Can't find a camera"
+    else:
+        if cam_width > cam_width_max or cam_height > cam_height_max or cam_height/cam_width != 0.75:
+            raise "Wrong camera resolution."
+        else:
+            cap.set(cv2.CAP_PROP_FRAME_WIDTH, cam_width)
+            cap.set(cv2.CAP_PROP_FRAME_HEIGHT, cam_height)
+            cv_interface = OpencvInterface(cap, RES_OUTPUT,GSCALE, FONT, nb_class_max)
 
     # Hdmi port
     if args.hdmi_display:
@@ -243,7 +255,7 @@ def launch_demo(args):
 
                 ### ERROR ###
                 elif current_state == "error":
-                    print("\r--- Class(es) ",f"{cv_interface.empty_classe} out of {nb_class} are empty. Please do a reset. ---",end="")
+                    print("\r--- Class(es) ",f"{cv_interface.empty_classe} out of {nb_class} is/are empty. Please do a reset. ---",end="")
                     next_state = "error"
 
                 else :
@@ -308,7 +320,7 @@ def launch_demo(args):
                 T.fps_() # calculate fps
                 T.columns["FPS"] = T.fps
 
-                # Hdmi or pc screen
+                # Hdmi or computer screen
                 if not (args.no_display):
                     if args.hdmi_display:
                         # Returns a frame of the appropriate size for the video mode (undefined value)
