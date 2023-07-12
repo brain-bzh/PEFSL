@@ -55,7 +55,8 @@ It is also possible to run the demo on your computer using pytorch. Example weig
 python3 main.py --framework pytorch --device-pytorch cpu --backbone resnet9 --path-pytorch-weight ../resnet9_strided_16fmaps.pt --camera-resolution 320x240 --output-resolution 800x480
 ```
 
-The inputs are the following: {0-3} to register shots for classes {0-3}, i to start inference, r to reset the demo, p to pause the demo, q to quit.
+The inputs are the following: {1-4} to register shots for classes {0-3}, i to start inference, r to reset the demo, p to pause the demo, q to quit.
+Warning : this was coded with an AZERTY keyboard, and you have to use numbers on top of the keyboard (not the numeric keypad)
 
 # How to train a model, convert it to onnx, then to tensil and finally run it on the PYNQ
 ## Schema of the process

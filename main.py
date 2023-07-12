@@ -61,7 +61,7 @@ def launch_demo(args):
     probas = None
 
     # Possible classes
-    possible_input_keyboard = [chr(i+176) for i in range(4)] # maximum 4 class (you can replace the 4 by any positiv integer to increase nb_class_max)
+    possible_input_keyboard = [chr(i+49) for i in range(4)] # maximum 4 class (you can replace the 4 by any positiv integer to increase nb_class_max)
     possible_input_pynq = ["1", "2", "3", "4"]
     nb_class_max = 0
     registered_class = None
