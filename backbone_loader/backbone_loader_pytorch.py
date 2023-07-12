@@ -1,10 +1,10 @@
-print("importing torch")
+print("Importing torch...")
 import torch
 import numpy as np
 from typing import Union
 import os
 
-print("torch imported")
+print("Torch imported.")
 
 from backbone_loader.backbone_pytorch.model import get_model
 

@@ -11,7 +11,6 @@ DEMO of few shot learning:
 #'/usr/local/share/pynq-venv/lib/python3.8/site-packages', '', '', '/usr/lib/python3.8/dist-packages', '', '', '/home/xilinx'
 import cv2
 import numpy as np
-# import cProfile
 
 from input_output.graphical_interface import OpencvInterface
 from input_output.graphical_interface import Timer
@@ -20,7 +19,7 @@ from backbone_loader.backbone_loader import get_model
 from few_shot_model.data_few_shot import DataFewShot
 from args import get_args_demo
 
-print("import done")
+print("\nImport done.")
 
 def preprocess(img, dtype=np.float32):
     """
@@ -37,16 +36,23 @@ def preprocess(img, dtype=np.float32):
     std = np.array([0.229, 0.224, 0.225], dtype=dtype)
     return (img / 255 - mean/std)
 
+def get_gpio(overlay):
+    from input_output.boutons_manager import ButtonsManager
+    from pynq.lib import AxiGPIO
+    btns_gpio_dict = overlay.ip_dict['btns_gpio']
+    pynq_button = AxiGPIO(btns_gpio_dict).channel1 #GPIO1
+    external_button = AxiGPIO(btns_gpio_dict).channel2 #GPIO2
+    return (pynq_button, external_button)
 
 def launch_demo(args):
     ####################################
     ###------# INITIALIZATION #------###
     ####################################
-    RES_HDMI = (600, 800)  # width height
-    RES_OUTPUT = tuple(map(int,args.output_resolution.split('x')))
+    RES_HDMI = (800, 600)  # width/height : https://urlz.fr/mFBP
+    RES_OUTPUT = args.output_resolution
     FONT = cv2.FONT_HERSHEY_SIMPLEX
-    GSCALE = 1 # General scale (=1 for the pynq screen)
-    PADDING = tuple(args.padding)
+    GSCALE = args.general_scale # General scale (=1 for the pynq screen)
+    PADDING = args.padding
 
     # Fewshot model
     backbone = get_model(args.backbone_specs)
@@ -63,7 +69,7 @@ def launch_demo(args):
     current_data = DataFewShot(nb_class_max) # useless parameters in DataFewShot (delete?)
 
     # State activation variable
-    demo_ON = True # True = on / False = off
+    demo_ON = True
     current_state = "reset" # Always begin by a reset and then an initialization
     next_state = "reset"
     
@@ -77,26 +83,22 @@ def launch_demo(args):
     nb_features = 5 # number of frame saved as features for each shot of a class 
 
     # Keyboard/Buttons
-    if args.button_keyboard == "button":
-        from input_output.boutons_manager import ButtonsManager
-        from pynq.lib import AxiGPIO
-        axi_gpio_design = args.overlay
-        btns_gpio_dict = axi_gpio_design.ip_dict['btns_gpio']
-        pynq_button = AxiGPIO(btns_gpio_dict).channel1 #GPIO
-        external_button = AxiGPIO(btns_gpio_dict).channel2 #GPIO2
+    if args.button == "pynq":
         possible_input = possible_input_pynq
         nb_class_max = len(possible_input)
+        pynq_button, external_button = get_gpio(args.overlay)
+        from input_output.boutons_manager import ButtonsManager
         btn_manager = ButtonsManager(pynq_button, external_button, nb_class_max)
-    elif args.button_keyboard == "keyboard":
+    elif args.button == "keyboard":
         possible_input = possible_input_keyboard
         nb_class_max = len(possible_input)
-    elif args.button_keyboard == "keyboard-button":
-        from input_output.boutons_manager import ButtonsManager
+    elif args.button == "keyboard-pynq":
         possible_input = possible_input_pynq
         nb_class_max = len(possible_input)
+        from input_output.boutons_manager import ButtonsManager
         btn_manager = ButtonsManager(None, None, nb_class_max)
     else:
-        print("Arg button_keyboard invalid")
+        raise "Button argument invalid."
     
     # Terminal Interface
     T = Timer()
@@ -104,10 +106,10 @@ def launch_demo(args):
     cap = cv2.VideoCapture(args.camera_specification)
     cam_width_max = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
     cam_height_max = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
-    cam_width, cam_height = map(int,args.camera_resolution.split('x'))
-    print(int(cam_width_max),"x",int(cam_height_max))
+    cam_width, cam_height = args.camera_resolution
+    print("Camera resolution : ",int(cam_width_max),"x",int(cam_height_max))
     if cam_width_max == 0 or cam_height_max == 0:
-        raise "Can't find a camera"
+        raise "Can't find a camera."
     else:
         if cam_width > cam_width_max or cam_height > cam_height_max or cam_height/cam_width != 0.75:
             raise "Wrong camera resolution."
@@ -120,7 +122,7 @@ def launch_demo(args):
     if args.hdmi_display:
         from pynq.lib.video import VideoMode
         hdmi_out = args.overlay.video.hdmi_out
-        mode = VideoMode(RES_HDMI[1], RES_HDMI[0], 24)  # 24 : pixel format
+        mode = VideoMode(RES_HDMI[0], RES_HDMI[1], 24)  # 24 : pixel format
         hdmi_out.configure(mode)
         hdmi_out.start()
     
@@ -132,12 +134,12 @@ def launch_demo(args):
             T.tic(1) #initial time
             ###------# GET INPUTS #------###            
             ### KEYBOARD/BUTTON INPUT
-            if args.button_keyboard == "button":
+            if args.button == "pynq":
                 key = btn_manager.change_state()    
-            elif args.button_keyboard == "keyboard":
+            elif args.button == "keyboard":
                 key = cv_interface.get_key()
                 key = chr(key)  # key convertion to char
-            elif args.button_keyboard == "keyboard_button":
+            elif args.button == "keyboard-pynq":
                 key = cv_interface.get_key()
                 key = btn_manager.change_state2(key)
             T.toc("BUTTONS READ")
@@ -243,7 +245,7 @@ def launch_demo(args):
                     current_data.reset()
                     cv_interface.reset_snapshot()
                     T.reset()
-                    if args.button_keyboard == "button" or args.button_keyboard == "keyboard_button":
+                    if args.button == "button" or args.button == "keyboard-pynq":
                         btn_manager.reset_button()
                     cv_interface.ERROR = False
                     cv_interface.empty_classe = []
@@ -321,17 +323,16 @@ def launch_demo(args):
                 T.columns["FPS"] = T.fps
 
                 # Hdmi or computer screen
-                if not (args.no_display):
-                    if args.hdmi_display:
-                        # Returns a frame of the appropriate size for the video mode (undefined value)
-                        frame = hdmi_out.newframe()
-                        # get the frame from the cv interface (size is the same since they are specified by  ResOutput)
-                        w, h = RES_OUTPUT
-                        pw, ph = PADDING
-                        frame[ph : ph + h, pw : pw + w, :] = cv_interface.frame
-                        hdmi_out.writeframe(frame)
-                    else:
-                        cv_interface.show()
+                if args.hdmi_display:
+                    # Returns a frame of the appropriate size for the video mode (undefined value)
+                    frame = hdmi_out.newframe()
+                    # get the frame from the cv interface (size is the same since they are specified by  ResOutput)
+                    w, h = RES_OUTPUT
+                    pw, ph = PADDING
+                    frame[ph : ph + h, pw : pw + w, :] = cv_interface.frame
+                    hdmi_out.writeframe(frame)
+                else:
+                    cv_interface.show()
                 
 
             else:

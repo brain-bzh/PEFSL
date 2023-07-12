@@ -43,16 +43,16 @@ Button 3: reset the demo
 2. Launch the demo as sudo with environment variables set:
 
     ```bash
-    sudo -E python3 main.py --button-keyboard button --hdmi-display tensil --path_tmodel /home/xilinx/resnet9_strided_16fmaps_onnx_custom_perf.tmodel --path_bit /home/xilinx/design.bit
+    sudo -E python3 main.py --framework tensil --backbone resnet9 --path-tmodel ../resnet9_strided_16fmaps_onnx_custom_perf.tmodel --path-bit ../design.bit --hdmi-display --camera-resolution 320x240 --output-resolution 800x480
     ```
 3. The demo should be running now on the HDMI screen. You can use the buttons on the PYNQ to interact with the demo as described above.
 
 
 
 # How to install and run the demo on your computer
-It is also possible to run the demo on your computer using onnx. Example weights are also available [on this link](https://drive.google.com/file/d/1u2a_PXEhzabauGSO_mkPQRekgvphM5L8/view?usp=sharing) under the name `resnet9_strided_16fmaps.pt`:
+It is also possible to run the demo on your computer using pytorch. Example weights are also available [on this link](https://drive.google.com/file/d/1u2a_PXEhzabauGSO_mkPQRekgvphM5L8/view?usp=sharing) under the name `resnet9_strided_16fmaps.pt`:
 ```bash
-python3 main.py pytorch --device-pytorch cpu --path-pytorch-weight resnet9_strided_16fmaps.pt
+python3 main.py --framework pytorch --device-pytorch cpu --backbone resnet9 --path-pytorch-weight ../resnet9_strided_16fmaps.pt --camera-resolution 320x240 --output-resolution 800x480
 ```
 
 The inputs are the following: {1-4} to register shots for classes {0-3}, i to start inference, r to reset the demo, q to quit.
