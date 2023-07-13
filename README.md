@@ -56,7 +56,7 @@ python3 main.py --framework pytorch --device-pytorch cpu --backbone resnet9 --pa
 ```
 
 The inputs are the following: {1-4} to register shots for classes {0-3}, i to start inference, r to reset the demo, p to pause the demo, q to quit.
-Warning : this was coded with an AZERTY keyboard, and you have to use numbers on top of the keyboard (not the numeric keypad)
+Warning : this was coded with an AZERTY keyboard, and you have to use numbers on top of the keyboard (not the numeric keypad).
 
 # How to train a model, convert it to onnx, then to tensil and finally run it on the PYNQ
 ## Schema of the process
@@ -68,9 +68,9 @@ A repository is available to train a model with pytorch: https://github.com/anto
 
 ## Conversion to onnx
 
-The script used to convert the model to onnx is [model_to_onnx.py](model_to_onnx.py). Examples to export backbone from other repository is available in the doctumentation of the file. In order to be exported with this script, the networks must be implemented in the demo. Look at [backbone_loader/backbone_pytorch/model.py](backbone_loader/backbone_pytorch/model.py) for a list of supported models. Thus, for the aforementioned models:
+The script used to convert the model to onnx is [model_to_onnx.py](model_to_onnx.py). Examples to export backbone from other repository is available in the documentation of the file. In order to be exported with this script, the networks must be a resnet9 or resnet12. Here is an example to convert a strided resnet9 into onnx file :
 ```bash
-    python3 model_to_onnx.py --input-resolution 32 --save-name resnet9_strided_16fmaps --backbone "resnet9"  --input-model resnet9_strided_16fmaps.pt
+    python3 model_to_onnx.py --input-resolution 32 --backbone resnet9 --input-model ../resnet9_strided_16fmaps.pt --save-name resnet9_strided_16fmaps --use-strides
 ```
 Weights available [on this link](https://drive.google.com/drive/folders/1ftzFL3Byidmls2zS0OdhVA2FBBb2krQR?usp=share_link).
 

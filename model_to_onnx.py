@@ -27,25 +27,19 @@ If the model feature ReduceMean, use the function replace_reduce_mean.
 
 """
 
-
 import argparse
-import json
 from pathlib import Path
-import os
 import torchinfo
 import onnx
 from onnxsim import simplify
 import torch
-import time
 import numpy as np
-from tqdm import tqdm
 import warnings
 
 from backbone_loader.backbone_pytorch.model import get_model
 
-def replace_reduce_mean(
-    onnx_model,
-):
+
+def replace_reduce_mean(onnx_model):
     """
     Replace all reduce_mean operation with GlobalAveragePool if they act on the last dimentions of the tensor
     do not change the name of this operation.
@@ -108,7 +102,7 @@ def replace_reduce_mean(
 
                     old_output_name = node.output.pop()
 
-                    # reshape dimentions
+                    # reshape dimensions
                     reshape_data = onnx.helper.make_tensor(
                         name="Reshape_dim",
                         data_type=onnx.TensorProto.INT64,
@@ -179,8 +173,6 @@ def model_to_onnx(args):
         "kernel_size",
         "mult_adds"])
 
-    dummy_input = torch.randn(1, 3, args.input_resolution,args.input_resolution, device="cpu")
-
     with open(info_path/ f"{args.save_name}_torchinfo.txt","w",encoding="utf-8") as file:
         to_write= str(ans)
         file.write(to_write)
@@ -203,12 +195,9 @@ def model_to_onnx(args):
 
 if __name__ == "__main__":
     # Define the command line arguments for the script
-
     parser = argparse.ArgumentParser()
-    parser.add_argument("--input-resolution", type=int, required=True, choices=range(32,100), metavar="[32-100]",
-        help="Input resolution(s) of the images (squared images), must be int between 32 and 100")
-    parser.add_argument("--backbone", type=str, required=True, choices = ["resnet9", "resnet12"],
-                         help="Specification of the model")
+    parser.add_argument("--input-resolution", type=int, required=True, choices=range(32,100), metavar="[32-100]", help="Input resolution(s) of the images (squared images), must be int between 32 and 100")
+    parser.add_argument("--backbone", type=str, required=True, choices = ["resnet9", "resnet12"], help="Specification of the model")
     parser.add_argument("--input-model", type=str, required=True, help="path to input pytorch model")
     parser.add_argument("--output-names", default="Output", help="Name of the output layer")
     parser.add_argument("--save-name", required=True, default="mymodel", help="Name of the saved model")

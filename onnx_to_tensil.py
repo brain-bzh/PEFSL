@@ -17,7 +17,7 @@ def move_file(compiled_model_name, output_path):
     Args :
         - compiled_model_name (str) : *_onnx_{arch}, correspond to output of tensil
     """
-    print("Moving file")
+    print("Moving file...")
 
     print(os.getcwd())
     print(compiled_model_name)
@@ -36,7 +36,7 @@ def move_file(compiled_model_name, output_path):
     try :
         os.rename(compiled_model_name + ".tdata", output_path + compiled_model_name + ".tdata")
     except :
-        print("No data file")
+        print("No tdata file")
 
 
 def save_compilation_result(logs, name, path):
@@ -45,22 +45,11 @@ def save_compilation_result(logs, name, path):
     """
     print("logs in:", path+name+".txt")
 
-
     with open(path+name+".txt","wb") as file:
-
         file.write(logs)
 
 
-
-def main():
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--onnx-path', type=Path, help='path to onnx file', required=True)
-    parser.add_argument('--arch-path', type=str, default= "arch/custom_perf.tarch", help='path to tensil architecture file')
-    parser.add_argument('--output-dir', type=str, default= "tensil/", help='path to script output directory')
-    parser.add_argument('--onnx-output', type=str, default= "Output", help='name of the onnx output layer (better to keep default) (default = Output)')
-    args = parser.parse_args()
-
+def onnx_to_tensil(args):
     # Create output directory
     if not os.path.exists(args.output_dir):
         os.makedirs(args.output_dir)
@@ -72,13 +61,12 @@ def main():
     try:
         client = docker.from_env()
     except docker.errors.DockerException as er:
-        raise docker.errors.DockerException("error when initializing docker client, maybe it's not launch ?") from er#
+        raise docker.errors.DockerException("Error when initializing docker client, maybe it's not launch ?") from er#
     
-
     name_net = args.onnx_path.stem
     try:
-        # - a : architecture
-        # - m : onnx model
+        # -a : architecture
+        # -m : onnx model
         # -v  : verbose
 
         # additional summary (all default to true):
@@ -108,16 +96,24 @@ def main():
 
     except docker.errors.ContainerError as exc:
         with open(args.output_dir + name_net + ".txt","wb") as file:
-
             file.write(exc.container.logs())
         print("-------------------------")
         print("-------------------------")
         print("-------------------------")
         print("Compilation unsuccessful")
         print("error was: ")
-        print("------------------------")
+        print("-------------------------")
         print(exc.container.logs())
-        print("------------------------")
+        print("-------------------------")
+
 
 if __name__ == "__main__":
-    main()
+    # Define the command line arguments for the script
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--onnx-path', type=Path, help='path to onnx file', required=True)
+    parser.add_argument('--arch-path', type=str, default= "arch/custom_perf.tarch", help='path to tensil architecture file')
+    parser.add_argument('--output-dir', type=str, default= "tensil/", help='path to script output directory')
+    parser.add_argument('--onnx-output', type=str, default= "Output", help='name of the onnx output layer (better to keep default) (default = Output)')
+    args = parser.parse_args()
+
+    onnx_to_tensil(args)

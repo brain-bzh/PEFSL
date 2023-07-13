@@ -16,7 +16,7 @@ def convert_to_absolute(path):
 
 def create_args(parser):
     ### FRAMEWORK ###
-    parser.add_argument("--framework", type=str, required=True, help="Framework to use for the backbone.")
+    parser.add_argument("--framework", type=str, required=True, choices=["pytorch","tensil","onnx"], help="Framework to use for the backbone.")
 
     ### BACKBONE ###
     parser.add_argument("--backbone", type=str, default="resnet9", help="Specify the model of backbone used. Can only be resnet9 or resnet12.")
