@@ -1,10 +1,8 @@
-import sys
 import os
 import json
 import numpy as np
 from typing import Union
 from pynq import Overlay
-
 from tcu_pynq.driver import Driver
 from tcu_pynq.architecture import Architecture
 from tcu_pynq.data_type import DataType
@@ -20,11 +18,11 @@ class BackboneTensilWrapper:
     ):
         """
         Args :
-            - path_bit : path qui mêne au bitstream, e.g : home/xilinx/bitstream.bit
-            - path_tmodel : path qui mène aui tmodel, e.g : home/xilinx/model.tmodel
+            - path_bit : path of the bitstream, e.g : home/xilinx/bitstream.bit
+            - path_tmodel : path of the tmodel, e.g : home/xilinx/model.tmodel
         """
-        print(f"dma 0 : {overlay.axi_dma_0}")
-
+        print(f"AXI DMA 0 : {overlay.axi_dma_0}")
+	
         if not hasattr(overlay, "axi_dma_0"):
             raise RuntimeError("DMA was not found in overlay")
         with open(path_tmodel) as f:
@@ -34,7 +32,7 @@ class BackboneTensilWrapper:
             self.tarch = Architecture(**arch)
 
         self.tcu = Driver(self.tarch, overlay.axi_dma_0, debug=debug)
-        print("tcu succefullt loaded")
+        print("TCU successfully loaded.")
 
         with open(path_tmodel, "r") as f:
             outputs = json.loads(f.read())["outputs"]
@@ -53,15 +51,7 @@ class BackboneTensilWrapper:
         assert single_image_batch.shape[-1] == 3, "last channel is not a rgb image"
 
         img = single_image_batch[0]
-
-        img = np.pad(
-            img,
-            [(0, 0), (0, 0), (0, self.tcu.arch.array_size - 3)],  # asuming rgb
-            "constant",
-            constant_values=0,
-        )
-        img = img.reshape((-1, self.tcu.arch.array_size))
-
+        img = img.reshape((-1, 3)) # 3 for rgb
         inputs = {"input.1": img}
         outputs = self.tcu.run(inputs)
 
