@@ -52,7 +52,6 @@ def launch_demo(args):
     RES_OUTPUT = args.output_resolution
     FONT = cv2.FONT_HERSHEY_SIMPLEX
     GSCALE = args.general_scale # General scale (=1 for the pynq screen)
-    PADDING = args.padding
 
     # Fewshot model
     backbone = get_model(args.backbone_specs)
@@ -92,7 +91,7 @@ def launch_demo(args):
     elif args.button == "keyboard":
         possible_input = possible_input_keyboard
         nb_class_max = len(possible_input)
-    elif args.button == "keyboard-pynq" or args.button == "sequence":
+    elif args.button == "keyboard-pynq":
         possible_input = possible_input_pynq
         nb_class_max = len(possible_input)
         from input_output.boutons_manager import ButtonsManager
@@ -125,6 +124,7 @@ def launch_demo(args):
         mode = VideoMode(RES_HDMI[0], RES_HDMI[1], 24)  # 24 : pixel format
         hdmi_out.configure(mode)
         hdmi_out.start()
+        new_frame = hdmi_out.newframe()
     
     ###############################
     ###------# MAIN LOOP #------###
@@ -323,13 +323,12 @@ def launch_demo(args):
 
                 # Hdmi or computer screen
                 if args.hdmi_display:
-                    # Returns a frame of the appropriate size for the video mode (undefined value)
-                    frame = hdmi_out.newframe()
                     # get the frame from the cv interface (size is the same since they are specified by  ResOutput)
                     w, h = RES_OUTPUT
-                    pw, ph = PADDING
-                    frame[ph : ph + h, pw : pw + w, :] = cv_interface.frame
-                    hdmi_out.writeframe(frame)
+                    new_frame[:h, :w, :] = cv_interface.frame
+                    T.toc("FRAME")
+                    hdmi_out.writeframe(new_frame)
+                    T.toc("WRITEFRAME")
                 else:
                     cv_interface.show()
                 

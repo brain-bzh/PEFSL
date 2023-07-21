@@ -48,7 +48,6 @@ def create_args(parser):
     # Output
     parser.add_argument("--output-resolution", type=str, default="800x540", help="Output resolution of the frame (width/height).")
     parser.add_argument("--general-scale", type=float, default=1, help="General scale (=1 for the pynq screen).")
-    parser.add_argument("--padding", type=int, default=[0, 0], nargs="+", help="Padding for the output (for the pynq).")
     parser.add_argument("--hdmi-display", action="store_true", help="To display on the hdmi screen of the pynq. If False, display on the computer screen.")
 
 
