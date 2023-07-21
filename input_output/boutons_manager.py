@@ -1,3 +1,5 @@
+import time
+
 class ButtonsManager:
     """
     La classe boutons renvoie grâce à la méthode change_state, la touche du clavier qui aurait
@@ -22,6 +24,10 @@ class ButtonsManager:
         self.last_class = 0
         self.reach_max = False
         self.key_pressed = "1"
+        self.nb_class = 0
+        self.nb_shot = 0
+        self.wait = time.time()
+        self.start = time.time()
 
     def change_state(self):
         
@@ -143,7 +149,31 @@ class ButtonsManager:
             self.last_state = state
 
         return "NO_KEY_PRESSED"
-   
+    
+
+    def button_sequence(self, period=1, timeout=15):
+        if(time.time() - self.start < timeout):
+            if(time.time() - self.wait > period):
+                self.wait = time.time()
+                if self.nb_class < 2:
+                    if self.nb_shot < 2:
+                        self.nb_shot += 1
+                        return self.key_pressed
+                    else:
+                        self.nb_shot = 0
+                        self.nb_class += 1
+                        if self.nb_class < 2:
+                            self.key_pressed = str(int(self.key_pressed) + 1)
+                            return self.key_pressed            
+                else:
+                    self.key_pressed = "i"
+                    return self.key_pressed
+            return "0"
+        else:
+            return "q"
+                
+        
+
     def reset_button(self):
         self.key_pressed = "1"
         self.last_state = 0

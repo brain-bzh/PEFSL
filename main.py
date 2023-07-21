@@ -91,7 +91,7 @@ def launch_demo(args):
     elif args.button == "keyboard":
         possible_input = possible_input_keyboard
         nb_class_max = len(possible_input)
-    elif args.button == "keyboard-pynq":
+    elif args.button == "keyboard-pynq" or args.button == "sequence":
         possible_input = possible_input_pynq
         nb_class_max = len(possible_input)
         from input_output.boutons_manager import ButtonsManager
@@ -142,6 +142,10 @@ def launch_demo(args):
             elif args.button == "keyboard-pynq":
                 key = cv_interface.get_key()
                 key = btn_manager.change_state2(key)
+            elif args.button == "sequence" and (current_state=="idle" or current_state=="inference"):
+                key = btn_manager.button_sequence()
+            else:
+                key = "0"
             T.toc("BUTTONS READ")
 
             if demo_ON:
@@ -213,11 +217,11 @@ def launch_demo(args):
                         probas[index] = probabilities[0,k]
                         k += 1
                     # headband, text and indicator
-                    cv_interface.draw_headband()
+                    #cv_interface.draw_headband()
                     T.tic()
-                    cv_interface.put_text(f"Object is from class : {classe_prediction}", 0.38)
+                    #cv_interface.put_text(f"Object is from class : {classe_prediction}", 0.38)
                     T.toc("TEXT")
-                    cv_interface.draw_indicator(probas)
+                    #cv_interface.draw_indicator(probas)
                     T.toc("INDICATORS")
                     T.timer() # display all timers on the terminal
                     next_state = "inference"
@@ -315,8 +319,8 @@ def launch_demo(args):
                 cv_interface.is_present_original_frame = False
                 if not current_state=="pause":
                     T.tic()
-                    cv_interface.put_fps_clock(np.round(1000*T.fps,1),clock)
-                    T.toc("TEXT FPS CLOCK")
+                    #cv_interface.put_fps_clock(np.round(1000*T.fps,1),clock)
+                    #T.toc("TEXT FPS CLOCK")
                 T.toc("TOTAL TIME (ms)",1)
                 T.fps_() # calculate fps
                 T.columns["FPS"] = T.fps
