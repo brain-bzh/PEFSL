@@ -70,30 +70,18 @@ A repository is available to train a model with pytorch: https://github.com/anto
 
 The script used to convert the model to onnx is [model_to_onnx.py](model_to_onnx.py). Examples to export backbone from other repository is available in the documentation of the file. In order to be exported with this script, the networks must be a resnet9 or resnet12. Here is an example to convert a strided resnet9 into onnx file :
 ```bash
-    python3 model_to_onnx.py --input-resolution 32 --backbone resnet9 --input-model ../resnet9_strided_16fmaps.pt --save-name resnet9_strided_16fmaps --use-strides
+python3 model_to_onnx.py --input-resolution 32 --backbone resnet9 --input-model ../resnet9_strided_16fmaps.pt --save-name resnet9_strided_16fmaps --use-strides
 ```
 Weights available [on this link](https://drive.google.com/drive/folders/1ftzFL3Byidmls2zS0OdhVA2FBBb2krQR?usp=share_link).
 
 ## Conversion to tensil
-Once you generated the onnx file for your model, you can generate the tensil model using the script [onnx_to_tensil.py](onnx_to_tensil.py).
-
-docker need to be installed, as well as [docker tensil image](https://hub.docker.com/r/tensilai/tensil). Compilation may take some time (5min on AMD ryzen 5 3350H for the smaller network). All the infos of the compilation of the network is saved to a txt file, for a broad overview, checkout the COMPILER SUMMARY at the end of the file.
+Once you generated the onnx file for your model, you can generate the tensil model using the script [onnx_to_tensil.py](onnx_to_tensil.py) :
 ```bash
-    usage: onnx_to_tensil.py [-h] [--onnx-path ONNX_PATH] [--arch-path ARCH_PATH]
-                         [--output-dir OUTPUT_DIR] [--onnx-output ONNX_OUTPUT]
-
-options:
-  -h, --help            show this help message and exit
-  --onnx-path ONNX_PATH
-                        path to onnx file
-  --arch-path ARCH_PATH
-                        path to tensil architecture file
-  --output-dir OUTPUT_DIR
-                        path to script output directory
-  --onnx-output ONNX_OUTPUT
-                        name of the onnx output layer (better to keep default) (default = Output)
-
+python3 onnx_to_tensil.py --onnx-path resnet9_strided_16fmaps.onnx --arch-path arch/custom_perf.tarch --output-dir tensil/ --generate-rtl
 ```
+
+Docker need to be installed, as well as [docker tensil image](https://hub.docker.com/r/tensilai/tensil). Compilation may take some time (5min on AMD ryzen 5 3350H for the smaller network). All the infos of the compilation and rtl files generation of the network are saved into txt files. For a broad overview, checkout the COMPILER SUMMARY at the end of the file.
+
 
 # Hardware vivado project
 The project has been created with Vivado 2020.2. The project is available in the folder `vivado_project`. The project is configured for the PYNQ-Z1 board. The board files can be found in the directory `vivado_project/pynq-z1`. Add them to Vivado by copying it to the directory `Vivado/2020.2/data/boards/board_files`.
@@ -108,7 +96,7 @@ You can then open the project with Vivado and generate the bitstream.
 If you want to modify the tensil architecture, replace the verilog files that are in the `vivado_project/base/sources_1/imports/tensil` folder with the ones that you generate with tensil. Then, regenerate the project with the tcl script.
 The output files that you will need after the bitstream generation are the following:
 - `vivado_project/base/base.runs/impl_1/base_wrapper.bit`
-- `base.gen/base/sources_1/bd/base/hw_handoff/base.hwh`
+- `vivado_project/base/base.gen/sources_1/bd/base/hw_handoff/base.hwh`
 
 Rename them to respectively to `design.bit` and `design.hwh` and copy them to the PYNQ.
 
