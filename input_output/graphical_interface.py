@@ -84,11 +84,11 @@ class OpencvInterface:
 
     """
 
-    def __init__(self, video_capture, resolution, Gscale, font, number_of_class):
+    def __init__(self, video_capture, resolution_output, Gscale, font, number_of_class):
         self.video_capture = video_capture
-        self.resolution = resolution
-        self.height = resolution[1]
-        self.width = resolution[0]
+        self.resolution_output = resolution_output
+        self.height = resolution_output[1]
+        self.width = resolution_output[0]
         self.Gscale = Gscale
         self.font = font
         self.font_scale = Gscale*0.001*self.width
@@ -109,15 +109,15 @@ class OpencvInterface:
         read and resize the frame to interface size
         """
         _, frame = self.video_capture.read()
-        self.frame = cv2.resize(frame, self.resolution, interpolation=cv2.INTER_AREA)
+        self.frame = cv2.resize(frame, self.resolution_output, interpolation=cv2.INTER_AREA)
         self.is_present_original_frame = True
 
-    def get_copy_captured_image(self, resolution):
+    def resize_for_backbone(self, resolution_input):
         """
         return a resized copy of the captured image if it still present in the data
         """
         if self.is_present_original_frame:
-            return cv2.resize(self.frame, dsize=resolution, interpolation=cv2.INTER_LINEAR)  # linear is faster than cubic
+            return cv2.resize(self.frame, dsize=resolution_input, interpolation=cv2.INTER_LINEAR)  # linear is faster than cubic
         else:
             raise Exception("original frame is not available")
     

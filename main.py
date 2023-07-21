@@ -19,7 +19,7 @@ from backbone_loader.backbone_loader import get_model
 from few_shot_model.data_few_shot import DataFewShot
 from args import get_args_demo
 
-print("\nImport done.")
+print("\nImports done.")
 
 def preprocess(img, dtype=np.float32):
     """
@@ -92,7 +92,7 @@ def launch_demo(args):
     elif args.button == "keyboard":
         possible_input = possible_input_keyboard
         nb_class_max = len(possible_input)
-    elif args.button == "keyboard-pynq":
+    elif args.button == "keyboard-pynq" or args.button == "sequence":
         possible_input = possible_input_pynq
         nb_class_max = len(possible_input)
         from input_output.boutons_manager import ButtonsManager
@@ -107,7 +107,6 @@ def launch_demo(args):
     cam_width_max = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
     cam_height_max = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
     cam_width, cam_height = args.camera_resolution
-    print("Camera resolution : ",int(cam_width_max),"x",int(cam_height_max))
     if cam_width_max == 0 or cam_height_max == 0:
         raise "Can't find a camera."
     else:
@@ -117,6 +116,7 @@ def launch_demo(args):
             cap.set(cv2.CAP_PROP_FRAME_WIDTH, cam_width)
             cap.set(cv2.CAP_PROP_FRAME_HEIGHT, cam_height)
             cv_interface = OpencvInterface(cap, RES_OUTPUT,GSCALE, FONT, nb_class_max)
+    print("Camera resolution : ",int(cam_width),"x",int(cam_height))
 
     # Hdmi port
     if args.hdmi_display:
@@ -162,7 +162,7 @@ def launch_demo(args):
                     cv_interface.draw_headband()
                     cv_interface.put_text("Initialization", 0.2)
                     # learn background during {nb_frame_init} frame
-                    frame = cv_interface.get_copy_captured_image(args.resolution_input)
+                    frame = cv_interface.resize_for_backbone(args.resolution_input)
                     frame = preprocess(frame)
                     T.tic()
                     features = backbone(frame)
@@ -184,7 +184,7 @@ def launch_demo(args):
                     cv_interface.put_text(f"Class {classe} registered", 0.3)
                     cv_interface.put_text(f"Number of shots : {cv_interface.get_number_snapshot(classe)}", 0.315, 2)
                     # 10 (nb_features) following frames after pressing the button will be saved as features
-                    frame = cv_interface.get_copy_captured_image(args.resolution_input)
+                    frame = cv_interface.resize_for_backbone(args.resolution_input)
                     frame = preprocess(frame)
                     T.tic()
                     features = backbone(frame)
@@ -201,10 +201,9 @@ def launch_demo(args):
                 ### INFERENCE ###
                 elif current_state == "inference":
                     # do the inference
-                    frame = cv_interface.get_copy_captured_image(args.resolution_input)
-                    T.tic()
+                    frame = cv_interface.resize_for_backbone(args.resolution_input)
                     frame = preprocess(frame)
-                    T.toc("PREPROCESS")
+                    T.tic()
                     features = backbone(frame)
                     T.toc("BACKBONE")
                     (classe_prediction, probabilities) = few_shot_model.predict_class_moving_avg(features, probabilities, current_data.get_shot_list(), current_data.get_mean_features())
@@ -215,7 +214,7 @@ def launch_demo(args):
                         k += 1
                     # headband, text and indicator
                     cv_interface.draw_headband()
-                    T.toc("HEADBAND")
+                    T.tic()
                     cv_interface.put_text(f"Object is from class : {classe_prediction}", 0.38)
                     T.toc("TEXT")
                     cv_interface.draw_indicator(probas)
@@ -245,7 +244,7 @@ def launch_demo(args):
                     current_data.reset()
                     cv_interface.reset_snapshot()
                     T.reset()
-                    if args.button == "button" or args.button == "keyboard-pynq":
+                    if args.button == "pynq" or args.button == "keyboard-pynq":
                         btn_manager.reset_button()
                     cv_interface.ERROR = False
                     cv_interface.empty_classe = []
