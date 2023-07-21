@@ -55,7 +55,6 @@ def onnx_to_tensil(args):
         os.makedirs(args.output_dir)
 
     # Network Compilation
-    print("Tensil compiling...")
 
     pwd = os.getcwd()
     try:
@@ -77,42 +76,54 @@ def onnx_to_tensil(args):
         # --strides-summary
         # --instructions-summary
 
-        summary_flags=["-s", "true","--layers-summary","true","--scheduler-summary","true","--partitions-summary","true","--strides-summary","true","--instructions-summary","true"]
+        if args.generate_rtl:
+            print("Tensil rtl generation...")
+            log_rtl = client.containers.run("tensilai/tensil:latest",
+                                            ["tensil", "rtl", "-a", args.arch_path, "-t", args.output_dir, "-s", "true" ],
+                                            volumes=[pwd + ":/work"],
+                                            working_dir="/work",
+                                            stderr=True)
+            save_compilation_result(log_rtl, name_net+"_rtl", args.output_dir)
 
-        log_casa = client.containers.run("tensilai/tensil:latest",
+        print("Tensil compiling...")
+        summary_flags=["-s", "true","--layers-summary","true","--scheduler-summary","true","--partitions-summary","true","--strides-summary","true","--instructions-summary","true"]
+        log_compile = client.containers.run("tensilai/tensil:latest",
                                             ["tensil", "compile", "-a", args.arch_path, "-m", args.onnx_path.as_posix(),
                                             "-o", args.onnx_output, "-t", args.output_dir]+summary_flags,
                                             volumes=[pwd + ":/work"],
                                             working_dir="/work",
                                             stderr=True)
 
-        save_compilation_result(log_casa, name_net, args.output_dir)
-        print("-------------------------")
-        print("-------------------------")
-        print("-------------------------")
-        print("Compilation successful !!")
-        print("-------------------------")
-        print("-------------------------")
+        save_compilation_result(log_compile, name_net, args.output_dir)
+        print("---------------------------------------")
+        print("---------------------------------------")
+        print("---------------------------------------")
+        print("------ Compilation successful !! ------")
+        print("---------------------------------------")
+        print("---------------------------------------")
+        print("---------------------------------------")
 
     except docker.errors.ContainerError as exc:
         with open(args.output_dir + name_net + ".txt","wb") as file:
             file.write(exc.container.logs())
-        print("-------------------------")
-        print("-------------------------")
-        print("-------------------------")
-        print("Compilation unsuccessful")
-        print("error was: ")
-        print("-------------------------")
+        print("---------------------------------------")
+        print("---------------------------------------")
+        print("---------------------------------------")
+        print("------ Compilation unsuccessful -------")
+        print("------ Error was : --------------------")
+        print("---------------------------------------")
+        print("---------------------------------------")
         print(exc.container.logs())
-        print("-------------------------")
+        print("---------------------------------------")
 
 
 if __name__ == "__main__":
     # Define the command line arguments for the script
     parser = argparse.ArgumentParser()
-    parser.add_argument('--onnx-path', type=Path, help='path to onnx file', required=True)
+    parser.add_argument('--onnx-path', type=Path, required=True, help='path to onnx file')
     parser.add_argument('--arch-path', type=str, default= "arch/custom_perf.tarch", help='path to tensil architecture file')
     parser.add_argument('--output-dir', type=str, default= "tensil/", help='path to script output directory')
+    parser.add_argument('--generate-rtl', action="store_true", help='to also generate rtl files')
     parser.add_argument('--onnx-output', type=str, default= "Output", help='name of the onnx output layer (better to keep default) (default = Output)')
     args = parser.parse_args()
 
