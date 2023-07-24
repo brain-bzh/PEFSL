@@ -76,15 +76,6 @@ def onnx_to_tensil(args):
         # --strides-summary
         # --instructions-summary
 
-        if args.generate_rtl:
-            print("Tensil rtl generation...")
-            log_rtl = client.containers.run("tensilai/tensil:latest",
-                                            ["tensil", "rtl", "-a", args.arch_path, "-t", args.output_dir, "-s", "true" ],
-                                            volumes=[pwd + ":/work"],
-                                            working_dir="/work",
-                                            stderr=True)
-            save_compilation_result(log_rtl, name_net+"_rtl", args.output_dir)
-
         print("Tensil compiling...")
         summary_flags=["-s", "true","--layers-summary","true","--scheduler-summary","true","--partitions-summary","true","--strides-summary","true","--instructions-summary","true"]
         log_compile = client.containers.run("tensilai/tensil:latest",
@@ -93,8 +84,17 @@ def onnx_to_tensil(args):
                                             volumes=[pwd + ":/work"],
                                             working_dir="/work",
                                             stderr=True)
-
+    
+        print("Tensil rtl generation...")
+        log_rtl = client.containers.run("tensilai/tensil:latest",
+                                        ["tensil", "rtl", "-a", args.arch_path, "-d", "64", "-t", args.output_dir, "-s", "true" ],
+                                        volumes=[pwd + ":/work"],
+                                        working_dir="/work",
+                                        stderr=True)
+        
+        save_compilation_result(log_rtl, name_net+"_rtl", args.output_dir)
         save_compilation_result(log_compile, name_net, args.output_dir)
+
         print("---------------------------------------")
         print("---------------------------------------")
         print("---------------------------------------")
@@ -123,7 +123,6 @@ if __name__ == "__main__":
     parser.add_argument('--onnx-path', type=Path, required=True, help='path to onnx file')
     parser.add_argument('--arch-path', type=str, default= "arch/custom_perf.tarch", help='path to tensil architecture file')
     parser.add_argument('--output-dir', type=str, default= "tensil/", help='path to script output directory')
-    parser.add_argument('--generate-rtl', action="store_true", help='to also generate rtl files')
     parser.add_argument('--onnx-output', type=str, default= "Output", help='name of the onnx output layer (better to keep default) (default = Output)')
     args = parser.parse_args()
 
