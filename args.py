@@ -40,13 +40,14 @@ def create_args(parser):
     parser.add_argument("--path-onnx", type=str, default="../resnet9_strided_16fmaps.onnx", help="Path of the .onnx file. Input image resolution should match the resolution of the model.")
 
     ### PARAMETERS FOR THE DEMO ###
+    parser.add_argument("--max-fps", action="store_true", help="Puts all the parameters in an optiomal way to get the max fps.")
     # Camera
     parser.add_argument("--camera-specification", type=int, default=0, help="Specification of the camera. 0 for the first camera, 1 for the second ...")
     parser.add_argument("--camera-resolution", type=str, default="640x480", help="Camera resolution. Must be 16:9 and less or equal to resolution max.")
     # Buttons
     parser.add_argument("--button", type=str, default="keyboard", help="Input device for the button. Can be keyboard (on computer), pynq (on pynq) or keyboard-pynq (simulate pynq on computer).")
     # Output
-    parser.add_argument("--output-resolution", type=str, default="800x540", help="Output resolution of the frame (width/height).")
+    parser.add_argument("--output-resolution", type=str, default="800x480", help="Output resolution of the frame (width/height).")
     parser.add_argument("--general-scale", type=float, default=1, help="General scale (=1 for the pynq screen).")
     parser.add_argument("--hdmi-display", action="store_true", help="To display on the hdmi screen of the pynq. If False, display on the computer screen.")
 
@@ -84,12 +85,11 @@ def framework_choice(args):
     args.classifier_specs = {"model_name":args.classifier_type}
     if args.classifier_type == "knn":
         args.classifier_specs["kwargs"] = {"number_neighboors":args.number_neiboors}
-
+        
 
 def args_treatement(args):
     args.output_resolution = tuple(map(int,args.output_resolution.split('x'))) # Tuple conversion
     args.camera_resolution = tuple(map(int,args.camera_resolution.split('x'))) # Tuple conversion
-    args.padding = tuple(args.padding) # Tuple conversion
     args.resolution_input = (args.resolution_input, args.resolution_input)
 
 

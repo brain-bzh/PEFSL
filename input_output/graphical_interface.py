@@ -84,7 +84,7 @@ class OpencvInterface:
 
     """
 
-    def __init__(self, video_capture, resolution_output, Gscale, font, number_of_class):
+    def __init__(self, video_capture, resolution_output, Gscale, font, number_of_class, max_fps):
         self.video_capture = video_capture
         self.resolution_output = resolution_output
         self.height = resolution_output[1]
@@ -92,7 +92,7 @@ class OpencvInterface:
         self.Gscale = Gscale
         self.font = font
         self.font_scale = Gscale*0.001*self.width
-        self.font_thickness = int(np.round(Gscale*0.0025*self.width))
+        self.font_thickness = int(np.round(Gscale*0.00001*self.width))
         self.headband_height = int(Gscale*0.1*self.height)
         self.top_gap = int(0.67*self.headband_height)
         self.bloc_gap = int(Gscale*0.04*self.height)
@@ -103,6 +103,7 @@ class OpencvInterface:
         self.snapshot = [[] for i in range(number_of_class)]
         self.ERROR = False
         self.empty_classe = []
+        self.draw_interface = not max_fps # enable or disable display of headband ans all indicators
         
     def read_frame(self):
         """
@@ -132,77 +133,78 @@ class OpencvInterface:
         """
         Draw indicator : draw shots, probability and level bar for each class
         """
+        if self.draw_interface:
+            ###PARAMETERS###
+            #shot_frames
+            shot_width = self.shot_width
+            shot_height = self.shot_height
+            shot_shift = int(self.Gscale*0.01*self.width)
+            shot_gap = int(self.Gscale*0.025*self.height)
+            #level bar
+            level_bar_width = int(0.02*self.width)
+            level_bar_height = shot_height
+            #percentage
+            font_percentage_scale = self.font_scale
+            font_class_scale = 0.7*font_percentage_scale
+            font_percentage_thickness = self.font_thickness
+            font_class_thickness = int(0.7*font_percentage_thickness)
+            if self.font_thickness==0:
+                font_percentage_thickness = 1
+                font_class_thickness = 1
 
-        ###PARAMETERS###
-        #shot_frames
-        shot_width = self.shot_width
-        shot_height = self.shot_height
-        shot_shift = int(self.Gscale*0.01*self.width)
-        shot_gap = int(self.Gscale*0.025*self.height)
-        #level bar
-        level_bar_width = int(0.02*self.width)
-        level_bar_height = shot_height
-        #percentage
-        font_percentage_scale = self.font_scale
-        font_class_scale = 0.7*font_percentage_scale
-        font_percentage_thickness = self.font_thickness
-        font_class_thickness = int(0.7*font_percentage_thickness)
-        if self.font_thickness==0:
-            font_percentage_thickness = 1
-            font_class_thickness = 1
+            ###DRAW SHOT WITH SHIFT###
+            #init position of the first shot
+            x_start = self.bloc_gap + shot_gap
+            x_end = self.bloc_gap + shot_gap + shot_width
+            y_start = self.headband_height + self.bloc_gap + shot_gap
+            y_end = self.headband_height + self.bloc_gap + shot_gap + shot_height
 
-        ###DRAW SHOT WITH SHIFT###
-        #init position of the first shot
-        x_start = self.bloc_gap + shot_gap
-        x_end = self.bloc_gap + shot_gap + shot_width
-        y_start = self.headband_height + self.bloc_gap + shot_gap
-        y_end = self.headband_height + self.bloc_gap + shot_gap + shot_height
-
-        for k in range(len(probabilities)):
-            images = self.snapshot[k]
-            if images == []:
-                self.ERROR = True
-                self.empty_classe.append(str(k))
-            elif y_end<self.height:
-                #draw shots
-                for n_shot in range(len(images)):
-                    if y_end<self.height:
-                        self.frame[y_start:y_end, x_start:x_end] = images[n_shot]
-                        x_start = x_start + shot_shift
-                        x_end = x_end + shot_shift
-                        y_start = y_start + shot_shift
-                        y_end = y_end + shot_shift
-                cv2.putText(self.frame,f"class {k}",(x_start, y_end - shot_height + 2*shot_shift),self.font,font_class_scale,(0, 0, 255),font_class_thickness,cv2.LINE_AA)
-                cv2.putText(self.frame,f"{n_shot+1}",(x_end - 4*shot_shift, y_end - shot_height + 2*shot_shift),self.font,font_class_scale,(0, 0, 255),font_class_thickness,cv2.LINE_AA)
-                #draw level
-                x_start = x_end - shot_shift + shot_gap
-                y_start = y_end - shot_shift
-                level_max = int(probabilities[k] * level_bar_height)
-                for lvl in range(level_max):
-                    level_start = (x_start , y_start - lvl)
-                    level_end = (x_start + level_bar_width , y_start - (lvl+1))
-                    cv2.rectangle(self.frame,level_start,level_end,percentage_to_color(lvl/level_bar_height),cv2.FILLED)
-                #draw percentage
-                x_start = x_start + shot_gap + level_bar_width
-                y_start = y_start
-                percentage_origin = (x_start , y_start)
-                cv2.putText(self.frame,f"{int(np.round(100*probabilities[k].item()))}%",percentage_origin,self.font,font_percentage_scale,(0, 0, 255),font_percentage_thickness,cv2.LINE_AA)
-                #update position for the next class
-                x_start = self.bloc_gap + shot_gap
-                x_end = x_start + shot_width
-                y_start = y_start + shot_gap
-                y_end = y_start + shot_height
+            for k in range(len(probabilities)):
+                images = self.snapshot[k]
+                if images == []:
+                    self.ERROR = True
+                    self.empty_classe.append(str(k))
+                elif y_end<self.height:
+                    #draw shots
+                    for n_shot in range(len(images)):
+                        if y_end<self.height:
+                            self.frame[y_start:y_end, x_start:x_end] = images[n_shot]
+                            x_start = x_start + shot_shift
+                            x_end = x_end + shot_shift
+                            y_start = y_start + shot_shift
+                            y_end = y_end + shot_shift
+                    cv2.putText(self.frame,f"class {k}",(x_start, y_end - shot_height + 2*shot_shift),self.font,font_class_scale,(0, 0, 255),font_class_thickness,cv2.LINE_AA)
+                    cv2.putText(self.frame,f"{n_shot+1}",(x_end - 4*shot_shift, y_end - shot_height + 2*shot_shift),self.font,font_class_scale,(0, 0, 255),font_class_thickness,cv2.LINE_AA)
+                    #draw level
+                    x_start = x_end - shot_shift + shot_gap
+                    y_start = y_end - shot_shift
+                    level_max = int(probabilities[k] * level_bar_height)
+                    for lvl in range(level_max):
+                        level_start = (x_start , y_start - lvl)
+                        level_end = (x_start + level_bar_width , y_start - (lvl+1))
+                        cv2.rectangle(self.frame,level_start,level_end,percentage_to_color(lvl/level_bar_height),cv2.FILLED)
+                    #draw percentage
+                    x_start = x_start + shot_gap + level_bar_width
+                    y_start = y_start
+                    percentage_origin = (x_start , y_start)
+                    cv2.putText(self.frame,f"{int(np.round(100*probabilities[k].item()))}%",percentage_origin,self.font,font_percentage_scale,(0, 0, 255),font_percentage_thickness,cv2.LINE_AA)
+                    #update position for the next class
+                    x_start = self.bloc_gap + shot_gap
+                    x_end = x_start + shot_width
+                    y_start = y_start + shot_gap
+                    y_end = y_start + shot_height
 
 
     def draw_headband(self, under_band = 1):
         """
         parameters :
             under_band (float) : permit to draw a band under the headband : 1 (default) : draw the headband / 1.75 : draw the headband & an underband
-        """      
-        ###HEADBAND###
-        headband_width = self.width
-        headband_height = int(under_band*self.headband_height)
-        cv2.rectangle(self.frame,(0,headband_height),(headband_width,0),(255,255,255),cv2.FILLED)
+        """
+        if self.draw_interface:
+            ###HEADBAND###
+            headband_width = self.width
+            headband_height = int(under_band*self.headband_height)
+            cv2.rectangle(self.frame,(0,headband_height),(headband_width,0),(255,255,255),cv2.FILLED)
 
     def put_text(self, text, length_proportion, level = 1):
         """
@@ -212,35 +214,37 @@ class OpencvInterface:
                 length_proportion (0<float<1): proportion of the length of the text relative to the frame, used to center the text
                 level (int) : text writing level : 1 (default) : in the headband / 2 : in the underband 
         """
-        text_length = int(self.Gscale*length_proportion*self.width)
-        origin = (self.width//2 - text_length//2 , level*self.top_gap)
-        cv2.putText(self.frame, text, origin, self.font, self.font_scale, (0, 0, 255), self.font_thickness, cv2.LINE_AA)   
+        if self.draw_interface:
+            text_length = int(self.Gscale*length_proportion*self.width)
+            origin = (self.width//2 - text_length//2 , level*self.top_gap)
+            cv2.putText(self.frame, text, origin, self.font, self.font_scale, (0, 0, 255), self.font_thickness, cv2.LINE_AA)   
 
     def put_fps_clock(self, fps, clock):
         """
         write fps on the left and clock on the right of the headband
         """
-        #calculate the shift to shift the clock for every decade
-        div = clock
-        clock_shift_text = 0
-        while div>=10:
-            div = div/10
-            clock_shift_text += 1
+        if self.draw_interface:
+            #calculate the shift to shift the clock for every decade
+            div = clock
+            clock_shift_text = 0
+            while div>=10:
+                div = div/10
+                clock_shift_text += 1
 
-        #draw white rectangle to see the fps
-        fps_start = (0 , self.headband_height)
-        fps_end = (self.bloc_gap + int(self.Gscale*0.19*self.width), 0)
-        cv2.rectangle(self.frame, fps_start, fps_end, (255,255,255), cv2.FILLED)
-        #draw white rectangle to see the clock
-        clock_origin = (self.width - self.bloc_gap - int(self.Gscale*( int(0.15*self.width) + clock_shift_text*int(0.019*self.width) )) , self.top_gap)
-        clock_start = (clock_origin[0] - self.bloc_gap , self.headband_height)
-        clock_end = (self.width , 0)
-        cv2.rectangle(self.frame, clock_start, clock_end, (255,255,255), cv2.FILLED)
+            #draw white rectangle to see the fps
+            fps_start = (0 , self.headband_height)
+            fps_end = (self.bloc_gap + int(self.Gscale*0.19*self.width), 0)
+            cv2.rectangle(self.frame, fps_start, fps_end, (255,255,255), cv2.FILLED)
+            #draw white rectangle to see the clock
+            clock_origin = (self.width - self.bloc_gap - int(self.Gscale*( int(0.15*self.width) + clock_shift_text*int(0.019*self.width) )) , self.top_gap)
+            clock_start = (clock_origin[0] - self.bloc_gap , self.headband_height)
+            clock_end = (self.width , 0)
+            cv2.rectangle(self.frame, clock_start, clock_end, (255,255,255), cv2.FILLED)
 
-        #put fps on the frame
-        cv2.putText(self.frame, f'fps : {fps}', (self.bloc_gap , self.top_gap), self.font, self.font_scale, (0, 0, 0), self.font_thickness, cv2.LINE_AA)
-        #put clock on the frame
-        cv2.putText(self.frame, f'clock : {clock}', clock_origin, self.font, self.font_scale, (0, 0, 0), self.font_thickness, cv2.LINE_AA)
+            #put fps on the frame
+            cv2.putText(self.frame, f'fps : {fps}', (self.bloc_gap , self.top_gap), self.font, self.font_scale, (0, 0, 0), self.font_thickness, cv2.LINE_AA)
+            #put clock on the frame
+            cv2.putText(self.frame, f'clock : {clock}', clock_origin, self.font, self.font_scale, (0, 0, 0), self.font_thickness, cv2.LINE_AA)
 
     def show(self):
         """

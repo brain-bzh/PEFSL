@@ -7,7 +7,7 @@ DEMO of few shot learning:
     q : quit the program
     p : pause the program
 """
-
+print("Running...")
 #'/usr/local/share/pynq-venv/lib/python3.8/site-packages', '', '', '/usr/lib/python3.8/dist-packages', '', '', '/home/xilinx'
 import cv2
 import numpy as np
@@ -18,8 +18,7 @@ from few_shot_model.few_shot_model import FewShotModel
 from backbone_loader.backbone_loader import get_model
 from few_shot_model.data_few_shot import DataFewShot
 from args import get_args_demo
-
-print("\nImports done.")
+print("Imports done.")
 
 def preprocess(img, dtype=np.float32):
     """
@@ -114,7 +113,7 @@ def launch_demo(args):
         else:
             cap.set(cv2.CAP_PROP_FRAME_WIDTH, cam_width)
             cap.set(cv2.CAP_PROP_FRAME_HEIGHT, cam_height)
-            cv_interface = OpencvInterface(cap, RES_OUTPUT,GSCALE, FONT, nb_class_max)
+            cv_interface = OpencvInterface(cap, RES_OUTPUT,GSCALE, FONT, nb_class_max, args.max_fps)
     print("Camera resolution : ",int(cam_width),"x",int(cam_height))
 
     # Hdmi port
@@ -217,11 +216,11 @@ def launch_demo(args):
                         probas[index] = probabilities[0,k]
                         k += 1
                     # headband, text and indicator
-                    #cv_interface.draw_headband()
+                    cv_interface.draw_headband()
                     T.tic()
-                    #cv_interface.put_text(f"Object is from class : {classe_prediction}", 0.38)
+                    cv_interface.put_text(f"Object is from class : {classe_prediction}", 0.38)
                     T.toc("TEXT")
-                    #cv_interface.draw_indicator(probas)
+                    cv_interface.draw_indicator(probas)
                     T.toc("INDICATORS")
                     T.timer() # display all timers on the terminal
                     next_state = "inference"
@@ -319,8 +318,8 @@ def launch_demo(args):
                 cv_interface.is_present_original_frame = False
                 if not current_state=="pause":
                     T.tic()
-                    #cv_interface.put_fps_clock(np.round(1000*T.fps,1),clock)
-                    #T.toc("TEXT FPS CLOCK")
+                    cv_interface.put_fps_clock(np.round(1000*T.fps,1),clock)
+                    T.toc("TEXT FPS CLOCK")
                 T.toc("TOTAL TIME (ms)",1)
                 T.fps_() # calculate fps
                 T.columns["FPS"] = T.fps
