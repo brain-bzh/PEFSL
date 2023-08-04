@@ -43,6 +43,16 @@ def get_gpio(overlay):
     external_button = AxiGPIO(btns_gpio_dict).channel2 #GPIO2
     return (pynq_button, external_button)
 
+def init_camera():
+    cap = cv2.VideoCapture(args.camera_id)
+    cam_width_max = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    cam_height_max = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    cam_width, cam_height = args.camera_resolution
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, cam_width)
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, cam_height)
+    print(f"Max camera resolution : {cam_width_max}x{cam_height_max}. Actual camera resolution : {cam_width}x{cam_height}.")
+    return cap
+
 def launch_demo(args):
     ####################################
     ###------# INITIALIZATION #------###
@@ -68,6 +78,7 @@ def launch_demo(args):
 
     # State activation variable
     demo_ON = True
+    reset_camera = False
     current_state = "reset" # Always begin by a reset and then an initialization
     next_state = "reset"
     
@@ -100,21 +111,10 @@ def launch_demo(args):
     
     # Terminal Interface
     T = Timer()
+
     # Camera
-    cap = cv2.VideoCapture(args.camera_specification)
-    cam_width_max = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
-    cam_height_max = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
-    cam_width, cam_height = args.camera_resolution
-    if cam_width_max == 0 or cam_height_max == 0:
-        raise "Can't find a camera."
-    else:
-        if cam_width > cam_width_max or cam_height > cam_height_max or cam_height/cam_width != 0.75:
-            raise "Wrong camera resolution."
-        else:
-            cap.set(cv2.CAP_PROP_FRAME_WIDTH, cam_width)
-            cap.set(cv2.CAP_PROP_FRAME_HEIGHT, cam_height)
-            cv_interface = OpencvInterface(cap, RES_OUTPUT,GSCALE, FONT, nb_class_max, args.max_fps)
-    print("Camera resolution : ",int(cam_width),"x",int(cam_height))
+    cap = init_camera()
+    cv_interface = OpencvInterface(cap, RES_OUTPUT, GSCALE, FONT, nb_class_max, args.max_fps)
 
     # Hdmi port
     if args.hdmi_display:
@@ -152,8 +152,8 @@ def launch_demo(args):
                 try:
                     cv_interface.read_frame()
                 except:
-                    print("failed to get next image")
-                    exit(1)
+                    reset_camera = True
+                    next_state = "error"
                 T.toc("FRAME READ")
 
                 ############################
@@ -223,7 +223,10 @@ def launch_demo(args):
                     cv_interface.draw_indicator(probas)
                     T.toc("INDICATORS")
                     T.timer() # display all timers on the terminal
-                    next_state = "inference"
+                    if cv_interface.ERROR:
+                        next_state = "error"
+                    else:
+                        next_state = "inference"
 
                 ### PAUSE ###
                 elif current_state == "pause":
@@ -249,21 +252,33 @@ def launch_demo(args):
                     T.reset()
                     if args.button == "pynq" or args.button == "keyboard-pynq":
                         btn_manager.reset_button()
+                    cv_interface.draw_interface = not args.max_fps
                     cv_interface.ERROR = False
                     cv_interface.empty_classe = []
                     probabilities = None
                     next_state = "initialization"
+                    # camera
+                    if reset_camera:
+                        cv_interface.close()
+                        del cv_interface
+                        cap = init_camera()
+                        cv_interface = OpencvInterface(cap, RES_OUTPUT, GSCALE, FONT, nb_class_max, args.max_fps)
+                        reset_camera = False
                     # headband and text
                     cv_interface.draw_headband()
                     cv_interface.put_text("Reset", 0.09)
 
                 ### ERROR ###
-                elif current_state == "error":
-                    print("\r--- Class(es) ",f"{cv_interface.empty_classe} out of {nb_class} is/are empty. Please do a reset. ---",end="")
+                elif current_state == "error" or cv_interface.ERROR:
+                    if cv_interface.ERROR:
+                        print("\r--- Class(es) ",f"{cv_interface.empty_classe} out of {nb_class} is/are empty. Please do a reset. ---",end="")
+                    if reset_camera:
+                        print("\r--- Can't find a camera. Please do a reset. ---", end="")
+                    T.ON = False
                     next_state = "error"
 
                 else :
-                    print("This state doesn't exist")
+                    print(f"\n--- The state <{current_state}> doesn't exist. ---")
                     break
 
                 ##########################################
@@ -302,20 +317,16 @@ def launch_demo(args):
                     # Stop the program
                     print("\n\n--- Stopping... ---")
                     break
-
-                ### ERROR ###
-                elif cv_interface.ERROR:
-                    print("\n")
-                    cv_interface.ERROR = False
-                    next_state = "error"
                 
-                current_state = next_state
+                if reset_camera and not current_state=="error":
+                    current_state = "error"
+                else:
+                    current_state = next_state
 
 
                 ###------# OUTPUTS #------###
                 # Add fps and clock on frame
                 clock += 1
-                cv_interface.is_present_original_frame = False
                 if not current_state=="pause":
                     T.tic()
                     cv_interface.put_fps_clock(np.round(1000*T.fps,1),clock)

@@ -42,7 +42,7 @@ def create_args(parser):
     ### PARAMETERS FOR THE DEMO ###
     parser.add_argument("--max-fps", action="store_true", help="Puts all the parameters in an optiomal way to get the max fps.")
     # Camera
-    parser.add_argument("--camera-specification", type=int, default=0, help="Specification of the camera. 0 for the first camera, 1 for the second ...")
+    parser.add_argument("--camera-id", type=int, default=0, help="Specification of the camera. 0 for the first camera, 1 for the second ...")
     parser.add_argument("--camera-resolution", type=str, default="640x480", help="Camera resolution. Must be 16:9 and less or equal to resolution max.")
     # Buttons
     parser.add_argument("--button", type=str, default="keyboard", help="Input device for the button. Can be keyboard (on computer), pynq (on pynq) or keyboard-pynq (simulate pynq on computer).")
