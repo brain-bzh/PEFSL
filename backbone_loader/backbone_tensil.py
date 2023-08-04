@@ -35,11 +35,11 @@ class BackboneTensilWrapper:
         print("TCU successfully loaded.")
 
         with open(path_tmodel, "r") as f:
-            outputs = json.loads(f.read())["outputs"]
-            output_names = [output["name"] for output in outputs]
-            if onnx_output_name not in output_names:
-                raise Exception(f"{onnx_output_name} not in tmodel output names. Set the onnx output name as {onnx_output_name}")
-            self.output_name = onnx_output_name
+            tmodel = json.loads(f.read())
+            input = tmodel["inputs"][0]
+            output = tmodel["outputs"][0]
+            self.input_name = input["name"]
+            self.output_name = output["name"]            
         self.tcu.load_model(path_tmodel)
         assert self.tcu.arch.array_size >= 3, "array size must be >=3"
 
@@ -52,7 +52,7 @@ class BackboneTensilWrapper:
 
         img = single_image_batch[0]
         img = img.reshape((-1, 3)) # 3 for rgb
-        inputs = {"input.1": img}
+        inputs = {self.input_name: img}
         outputs = self.tcu.run(inputs)
 
         return outputs[self.output_name][None, :]
