@@ -98,12 +98,12 @@ class OpencvInterface:
         self.bloc_gap = int(Gscale*0.04*self.height)
         self.shot_height = int(Gscale*0.2*self.height)
         self.shot_width = int(Gscale*0.2*self.width)
-        self.frame = None
+        self.frame = np.zeros((self.height, self.width, 3), np.uint8)
         self.number_of_class = number_of_class
         self.snapshot = [[] for i in range(number_of_class)]
         self.ERROR = False
         self.empty_classe = []
-        self.draw_interface = not max_fps # enable or disable display of headband ans all indicators
+        self.draw_interface = not max_fps # enable or disable display of headband and all indicators
         
     def read_frame(self):
         """
@@ -111,16 +111,12 @@ class OpencvInterface:
         """
         _, frame = self.video_capture.read()
         self.frame = cv2.resize(frame, self.resolution_output, interpolation=cv2.INTER_AREA)
-        self.is_present_original_frame = True
 
     def resize_for_backbone(self, resolution_input):
         """
         return a resized copy of the captured image if it still present in the data
         """
-        if self.is_present_original_frame:
-            return cv2.resize(self.frame, dsize=resolution_input, interpolation=cv2.INTER_LINEAR)  # linear is faster than cubic
-        else:
-            raise Exception("original frame is not available")
+        return cv2.resize(self.frame, dsize=resolution_input, interpolation=cv2.INTER_LINEAR)  # linear is faster than cubic
     
     def display_image(self, image, scale, position="ctr/ctr"):
         """
@@ -245,6 +241,15 @@ class OpencvInterface:
             cv2.putText(self.frame, f'fps : {fps}', (self.bloc_gap , self.top_gap), self.font, self.font_scale, (0, 0, 0), self.font_thickness, cv2.LINE_AA)
             #put clock on the frame
             cv2.putText(self.frame, f'clock : {clock}', clock_origin, self.font, self.font_scale, (0, 0, 0), self.font_thickness, cv2.LINE_AA)
+
+    def write_error_on_screen(self, text):
+        """
+        write error message on the frame
+        """
+        self.frame = np.zeros((self.height, self.width, 3), np.uint8)
+        self.draw_interface = False
+        cv2.rectangle(self.frame,(0,self.headband_height),(self.width,0),(255,255,255),cv2.FILLED) # headband
+        cv2.putText(self.frame, text, (self.bloc_gap , self.top_gap), self.font, self.font_scale, (0, 0, 0), self.font_thickness, cv2.LINE_AA) # error message
 
     def show(self):
         """

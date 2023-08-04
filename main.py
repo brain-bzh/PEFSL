@@ -272,8 +272,10 @@ def launch_demo(args):
                 elif current_state == "error" or cv_interface.ERROR:
                     if cv_interface.ERROR:
                         print("\r--- Class(es) ",f"{cv_interface.empty_classe} out of {nb_class} is/are empty. Please do a reset. ---",end="")
+                        cv_interface.write_error_on_screen(f"Class 0 is empty. Please do a reset.")
                     if reset_camera:
                         print("\r--- Can't find a camera. Please do a reset. ---", end="")
+                        cv_interface.write_error_on_screen("Can't find a camera. Please do a reset (green button).")
                     T.ON = False
                     next_state = "error"
 
