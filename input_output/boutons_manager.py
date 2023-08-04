@@ -33,7 +33,7 @@ class ButtonsManager:
         
         pynq = self.pynq_button.read()
         external = self.external_button.read()
-        if external==31:
+        if external not in [1,2,4,8,16,32,17]:
             external = 0
 
         state = pynq | external
@@ -77,6 +77,12 @@ class ButtonsManager:
                 if state == 32:
                     # quit
                     self.key_pressed = "q"
+                    self.last_state = state
+                    return self.key_pressed
+                
+                if state == 17: # 0b10001
+                    # reboot
+                    self.key_pressed = "REBOOT"
                     self.last_state = state
                     return self.key_pressed
 

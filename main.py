@@ -11,6 +11,8 @@ print("Running...")
 #'/usr/local/share/pynq-venv/lib/python3.8/site-packages', '', '', '/usr/lib/python3.8/dist-packages', '', '', '/home/xilinx'
 import cv2
 import numpy as np
+import os
+import time
 
 from input_output.graphical_interface import OpencvInterface
 from input_output.graphical_interface import Timer
@@ -238,6 +240,7 @@ def launch_demo(args):
                     clock = 0
                     demo_ON = False
                     T.ON = False
+                    time.sleep(1)
 
                 ### IDLE ###
                 elif current_state == "idle":
@@ -313,6 +316,13 @@ def launch_demo(args):
                 elif key == "r":
                     print("\n\n--- Reset ---")  
                     next_state = "reset"
+
+                ### REBOOT ###
+                elif key == "REBOOT":
+                    print("\n\n--- Rebooting... ---")
+                    cv_interface.write_error_on_screen("Rebooting...")
+                    next_state = "pause"
+                    os.system("sudo reboot")
                 
                 ### QUIT ###
                 elif key == "q":
