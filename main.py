@@ -240,7 +240,6 @@ def launch_demo(args):
                     clock = 0
                     demo_ON = False
                     T.ON = False
-                    time.sleep(1)
 
                 ### IDLE ###
                 elif current_state == "idle":
@@ -361,11 +360,13 @@ def launch_demo(args):
 
             else:
                 if key == "p":
+                    # Turn on the program
                     print("\n--- Turn on the demo ---")
                     demo_ON = True
                     T.ON = True
                     T.display = True
                     current_state = "reset"
+                    time.sleep(0.5)
                 if key == 'q':
                     # Stop the program
                     print("\n\n--- Stopping ---")
