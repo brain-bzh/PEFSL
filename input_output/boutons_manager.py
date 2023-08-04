@@ -47,6 +47,8 @@ class ButtonsManager:
 
                 if state == 2:
                     # change class
+                    if self.key_pressed == "i":
+                        self.key_pressed = "1"
                     if int(self.key_pressed) >= self.nb_class_max:
                         print(" Maximum class reached.")
                         self.reach_max = True
