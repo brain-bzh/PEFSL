@@ -76,25 +76,13 @@ Before drilling all holes, it's recommended to **assemble all components with ca
 - Bolts may be required under the PCB to prevent damage to the solder joints.
 - Attach components to the plate.
 
-<div style="display: flex;">
-    <div style="flex: 50%; padding: 10px;">
-        <img src="./Sources/electrical_diagram.png" alt="Image 1" style="width: 100%;">
-        <p style="text-align: center;">Electrical Diagram</p>
-    </div>
-    <div style="flex: 50%; padding: 10px;">
-        <img src="./Sources/pmod.png" alt="Image 2" style="width: 100%;">
-        <p style="text-align: center;">Pmod A Routing</p>
-    </div>
-</div>
+![Electrical diagram and PMOD-A routing](./Sources/electrical_diagram.png)
 
 **After assembling components on the plates**, you can start assembling the plates together.
 
 **Use spacers** to attach the Pynq plate to the power bank plate. The Pynq plate should not touch the other. Then, attach the screen plate on top of the Pynq plate using spacers. **With these 3 parts secured**, start routing cables **following the diagram**, using honeycomb shapes as guides. **You will need to cut honeycomb shapes** to accommodate the various cables.
 
-<figure style="text-align: center;">
-    <img src="./Sources/cable_routing.png" alt="Image 3">
-    <figcaption style="text-align: center;">Cable Routing</figcaption>
-</figure>
+![Cable routing](./Sources/cable_routing.png)
 
 **Short cables are easier to work with**. If not, use the space near the power bank and USB hub to bundle longer cables. Prevent protruding cables with spacers and secure with threads if needed. If you lack a DC/USB cable, solder a DC part to a USB part, using only the power segment of the USB cable.
 
