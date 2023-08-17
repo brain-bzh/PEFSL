@@ -1018,7 +1018,7 @@ proc create_hier_cell_video { parentCell nameHier } {
 
 
   # Create ports
-  set JB [ create_bd_port -dir I -from 4 -to 0 JB ]
+  set JA [ create_bd_port -dir I -from 5 -to 0 JA ]
   set hdmi_in_hpd [ create_bd_port -dir O -from 0 -to 0 hdmi_in_hpd ]
   set hdmi_out_hpd [ create_bd_port -dir O -from 0 -to 0 hdmi_out_hpd ]
 
@@ -1038,7 +1038,7 @@ proc create_hier_cell_video { parentCell nameHier } {
   set btns_gpio [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_gpio:2.0 btns_gpio ]
   set_property -dict [ list \
    CONFIG.C_ALL_INPUTS {1} \
-   CONFIG.C_GPIO2_WIDTH {5} \
+   CONFIG.C_GPIO2_WIDTH {6} \
    CONFIG.C_GPIO_WIDTH {4} \
    CONFIG.C_INTERRUPT_PRESENT {1} \
    CONFIG.C_IS_DUAL {1} \
@@ -2037,7 +2037,7 @@ proc create_hier_cell_video { parentCell nameHier } {
   connect_bd_intf_net -intf_net video_TMDS1 [get_bd_intf_ports hdmi_out] [get_bd_intf_pins video/TMDS_out]
 
   # Create port connections
-  connect_bd_net -net JB_1 [get_bd_ports JB] [get_bd_pins btns_gpio/gpio2_io_i]
+  connect_bd_net -net JA_1 [get_bd_ports JA] [get_bd_pins btns_gpio/gpio2_io_i]
   connect_bd_net -net axi_gpio_video_gpio_io_o [get_bd_ports hdmi_in_hpd] [get_bd_pins video/hdmi_in_hpd]
   connect_bd_net -net btns_gpio_ip2intc_irpt [get_bd_pins btns_gpio/ip2intc_irpt] [get_bd_pins concat_interrupts/In1]
   connect_bd_net -net concat_interrupts_dout [get_bd_pins concat_interrupts/dout] [get_bd_pins system_interrupts/intr]
