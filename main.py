@@ -91,7 +91,7 @@ def launch_demo(args):
     # Time related variables 
     clock = 0 # number of frames since begining
     nb_frame_init = 5
-    nb_features = 5 # number of frame saved as features for each shot of a class 
+    nb_features = 12 # number of frame saved as features for each shot of a class 
 
     # Keyboard/Buttons
     if args.button == "pynq":
