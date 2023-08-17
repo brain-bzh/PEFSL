@@ -115,3 +115,8 @@ When the plexiglass is fully in place, with the screen and buttons aligned, **sc
 For SD card or Ethernet access, **remove the top by unscrewing the screen and sliding the plexiglass in the opposite direction**.
 
 Generally, **you don't need to keep the top always on**. Using only the bottom and middle parts offers easier access to the Pynq-z1. **In this setup, securely screw the screen onto the spacers to prevent damage**.
+
+When you're not using the Pynq, **leave it plugged in via USB-C and press the** `quit` **button** (small black button on the right).
+In this setup, the Pynq will be powered on but no program will be running.
+
+To restart the demo, simply **unplug it**, which will automatically reboot the Pynq (likely due to a voltage drop).
