@@ -42,6 +42,8 @@ class ButtonsManager:
             if state != 0:
                 if state == 1:
                     # take a shot of the current class
+                    if self.key_pressed == "p":
+                        self.key_pressed = "1"
                     self.last_state = state
                     return self.key_pressed
 
@@ -93,7 +95,7 @@ class ButtonsManager:
         return "NO_KEY_PRESSED"
     
     def change_state2(self,key):
-        
+    # Work only on the numeric pad from an azerty keyboard
         if key==255:
             key = 0
         elif key==176:
@@ -106,7 +108,7 @@ class ButtonsManager:
             key = 8
         elif key==180:
             key = 16
-        elif key==113:
+        elif key==181:
             key = 32
         else:
             key = 0
@@ -116,11 +118,15 @@ class ButtonsManager:
             if state != 0:
                 if state == 1:
                     # take a shot of the current class
+                    if self.key_pressed == "p" or self.key_pressed == "i":
+                        self.key_pressed = "1"
                     self.last_state = state
                     return self.key_pressed
 
                 if state == 2:
                     # change class
+                    if self.key_pressed == "i":
+                        self.key_pressed = "1"
                     if int(self.key_pressed) >= self.nb_class_max:
                         print(" Maximum class reached.")
                         self.reach_max = True
