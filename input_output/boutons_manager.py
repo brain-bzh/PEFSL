@@ -42,7 +42,7 @@ class ButtonsManager:
             if state != 0:
                 if state == 1:
                     # take a shot of the current class
-                    if self.key_pressed == "p":
+                    if self.key_pressed == "p" or self.key_pressed == "i":
                         self.key_pressed = "1"
                     self.last_state = state
                     return self.key_pressed
