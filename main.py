@@ -163,9 +163,6 @@ def launch_demo(args):
                 ############################
                 ### INITIALIZATION ###
                 if current_state == "initialization":
-                    # headband and text
-                    cv_interface.draw_headband()
-                    cv_interface.put_text("Initialization", 0.2)
                     # learn background during {nb_frame_init} frame
                     frame = cv_interface.resize_for_backbone(args.resolution_input)
                     frame = preprocess(frame)
@@ -180,14 +177,14 @@ def launch_demo(args):
                     else:
                         next_state = "initialization"
                     k_init += 1
-                    T.timer() # display all timers on the terminal
+                    # display all timers on the terminal
+                    T.timer()
+                    # headband and text
+                    cv_interface.draw_headband()
+                    cv_interface.put_text("Initialization", 0.2)
 
                 ### REGISTRATION ###
                 elif current_state == "registration":
-                    # headband and text
-                    cv_interface.draw_headband(1.75)
-                    cv_interface.put_text(f"Class {classe} registered", 0.3)
-                    cv_interface.put_text(f"Number of shots : {cv_interface.get_number_snapshot(classe)}", 0.315, 2)
                     # 10 (nb_features) following frames after pressing the button will be saved as features
                     frame = cv_interface.resize_for_backbone(args.resolution_input)
                     frame = preprocess(frame)
@@ -201,7 +198,12 @@ def launch_demo(args):
                     else:
                         next_state = "registration"
                     k_reg += 1
-                    T.timer() # display all timers on the terminal
+                    # display all timers on the terminal
+                    T.timer()
+                    # headband and text
+                    cv_interface.draw_headband(1.75)
+                    cv_interface.put_text(f"Class {classe} registered", 0.3)
+                    cv_interface.put_text(f"Number of shots : {cv_interface.get_number_snapshot(classe)}", 0.315, 2)
 
                 ### INFERENCE ###
                 elif current_state == "inference":
