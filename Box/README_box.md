@@ -120,3 +120,8 @@ When you're not using the Pynq, **leave it plugged in via USB-C and press the** 
 In this setup, the Pynq will be powered on but no program will be running.
 
 To restart the demo, simply **unplug it**, which will automatically reboot the Pynq (likely due to a voltage drop).
+
+## Nota
+
+- When you **remove the camera**, you may have to reconnect the camera twice. This bug probably comes from the usb hub.
+- When you **connect the battery** with ucb-c, the demo still works, but **when you disconnect it, it reboots** (likely due to a voltage drop).
