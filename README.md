@@ -10,10 +10,9 @@ This repository contains the code to perform online Few shot Learning with a web
 
 
 ## This is what it looks like:
+A video of the demonstrator is available [here](https://www.youtube.com/watch?v=JPZgkxYSdg0).
 
 ![plot](./static/demo_screenshot.png)
-
-A video of the demonstrator is available [here}{https://www.youtube.com/watch?v=JPZgkxYSdg0}.
 
 There are two steps in the demonstration :
 - first you need to take a few shots of the classes you want to recognize
