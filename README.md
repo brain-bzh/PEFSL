@@ -1,8 +1,13 @@
 # PEFSL : A Pipeline for Embedded Few-Shot Learning
+
+
+**[News] 🥳 🎉 🥇 PEFSL won the [Xilinx Open Hardware Competition](https://www.openhw.eu/2023-results-gallery) in the Student AI Track! 🥇 🎉 🥳**
+
+
 We propose a modular pipeline for the training, compilation, hardware synthesis and deployment of a few-shot learning application on an FPGA SoC.
 This repository contains the code to perform online Few shot Learning with a webcam on FPGA using the [Tensil](https://tensil.ai) framework on the [PYNQ-Z1](http://www.pynq.io/). It also contains the code to evaluate the performance of the network on the dataset cifar-10. Models and algorithms are based on the [EASY paper](https://arxiv.org/abs/2201.09699).
 
-**[News]** PEFSL won the [Xilinx Open Hardware Competition](https://www.openhw.eu/2023-results-gallery) in the Student AI Track!
+
 
 ## This is what it looks like:
 
