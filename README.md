@@ -128,3 +128,4 @@ You can also execute the script `get_output_files.sh` to extract and rename them
     - Sometimes there is a bug with memory allocation (an error is raised). We are investigating it. For now if it happens, just reset the PYNQ.
     - In the PYNQ, always launch the scripts using sudo -E.
     - When launching the model, if the tarch used when compiling the model does not correspond to the accelerator, the scripts fail silently.
+    - If you are running the demo on your computer and encounter a black screen with the message "Can't find a camera. Please do a reset (green button)" despite having a camera connected and available, increase the camera resolution. This issue may occur because your camera does not support such a low resolution.
