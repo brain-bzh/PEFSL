@@ -1,5 +1,11 @@
 # PEFSL : PYNQ-Embedded Few Shot Learning
+
+
+**[News] 🥳 🎉 🥇 PEFSL won the [Xilinx Open Hardware Competition](https://www.openhw.eu/2023-results-gallery) in the Student AI Track! 🥇 🎉 🥳**
+
 This repository contains the code to perform online Few shot Learning with a webcam on FPGA using the [Tensil](https://tensil.ai) framework on the [PYNQ-Z1](http://www.pynq.io/). It also contains the code to evaluate the performance of the network on the dataset cifar-10. Models and algorithms are based on the [EASY paper](https://arxiv.org/abs/2201.09699).
+
+You can find a video demonstration of the platform [here](https://www.youtube.com/watch?v=JPZgkxYSdg0)
 
 ## This is what it looks like:
 
