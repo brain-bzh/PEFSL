@@ -83,15 +83,15 @@ def launch_demo(args):
     reset_camera = False
     current_state = "reset" # Always begin by a reset and then an initialization
     next_state = "reset"
-    
+
     # Counter
     k_init = 0
     k_reg = 0
 
-    # Time related variables 
+    # Time related variables
     clock = 0 # number of frames since begining
     nb_frame_init = 5
-    nb_features = 12 # number of frame saved as features for each shot of a class 
+    nb_features = 12 # number of frame saved as features for each shot of a class
 
     # Keyboard/Buttons
     if args.button == "pynq":
@@ -110,7 +110,7 @@ def launch_demo(args):
         btn_manager = ButtonsManager(None, None, nb_class_max)
     else:
         raise "Button argument invalid."
-    
+
     # Terminal Interface
     T = Timer()
 
@@ -126,17 +126,17 @@ def launch_demo(args):
         hdmi_out.configure(mode)
         hdmi_out.start()
         new_frame = hdmi_out.newframe()
-    
+
     ###############################
     ###------# MAIN LOOP #------###
     ###############################
     try:
         while True:
             T.tic(1) #initial time
-            ###------# GET INPUTS #------###            
+            ###------# GET INPUTS #------###
             ### KEYBOARD/BUTTON INPUT
             if args.button == "pynq":
-                key = btn_manager.change_state()    
+                key = btn_manager.change_state()
             elif args.button == "keyboard":
                 key = cv_interface.get_key()
                 key = chr(key)  # key convertion to char
@@ -247,7 +247,7 @@ def launch_demo(args):
                 elif current_state == "idle":
                     T.timer() # display all timers on the terminal
                     next_state = "idle"
-                
+
                 ### RESET ###
                 elif current_state == "reset":
                     # reset states and values
@@ -290,13 +290,13 @@ def launch_demo(args):
                 ##########################################
                 ###------# UPDATE CURRENT STATE #------###
                 ##########################################
-                
+
                 ### CLASSES REGISTRATION ###
                 if key in possible_input and not (current_state=="initialization" or current_state=="inference" or current_state=="registration"):
                     classe = possible_input.index(key)
                     cv_interface.add_snapshot(classe) # the first one will be saved for display
                     next_state = "registration"
-                    
+
                 ### INFERENCE ###
                 elif key == "i" and current_data.is_data_recorded() and not (current_state=="inference"):
                     print("\n\n--- Beginning Inference ---")
@@ -306,16 +306,16 @@ def launch_demo(args):
                     nb_class = registered_class[-1]+1
                     probas = nb_class*[0]
                     next_state = "inference"
-                
+
                 ### PAUSE ###
                 elif key == "p":
                     # Pause the program
                     print("\n\n--- Turn off the demo ---")
                     next_state = "pause"
-                
+
                 ### RESET ###
                 elif key == "r":
-                    print("\n\n--- Reset ---")  
+                    print("\n\n--- Reset ---")
                     next_state = "reset"
 
                 ### REBOOT ###
@@ -324,13 +324,13 @@ def launch_demo(args):
                     cv_interface.write_error_on_screen("Rebooting...")
                     next_state = "pause"
                     os.system("sudo reboot")
-                
+
                 ### QUIT ###
                 elif key == "q":
                     # Stop the program
                     print("\n\n--- Stopping... ---")
                     break
-                
+
                 if reset_camera and not current_state=="error":
                     current_state = "error"
                 else:
@@ -358,7 +358,7 @@ def launch_demo(args):
                     T.toc("WRITEFRAME")
                 else:
                     cv_interface.show()
-                
+
 
             else:
                 if key == "p":

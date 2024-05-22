@@ -1,13 +1,12 @@
-# PEFSL : PYNQ-Embedded Few Shot Learning
+# PEFSL : A Pipeline for Embedded Few-Shot Learning
 
 
 **[News] 🥳 🎉 🥇 PEFSL won the [Xilinx Open Hardware Competition](https://www.openhw.eu/2023-results-gallery) in the Student AI Track! 🥇 🎉 🥳**
 
 This repository contains the code to perform online Few shot Learning with a webcam on FPGA using the [Tensil](https://tensil.ai) framework on the [PYNQ-Z1](http://www.pynq.io/). It also contains the code to evaluate the performance of the network on the dataset cifar-10. Models and algorithms are based on the [EASY paper](https://arxiv.org/abs/2201.09699).
 
-You can find a video demonstration of the platform [here](https://www.youtube.com/watch?v=JPZgkxYSdg0)
-
 ## This is what it looks like:
+A video of the demonstrator is available [here](https://www.youtube.com/watch?v=JPZgkxYSdg0).
 
 ![plot](./static/box.png)
 
@@ -54,7 +53,7 @@ If you use a keyboard, you can use all the buttons, but only the numbers on top 
 ## Python libraries
 
 All the libraries you need to run the demo are listed in `requirements.txt`. To install all of them, execute the following command :
-    
+
 ```bash
 pip install -r requirements.txt
 ```
@@ -116,7 +115,7 @@ You can then open the project with Vivado and generate the bitstream.
 
 If you want to modify the tensil architecture, replace the verilog files that are in the `vivado_project/base/sources_1/imports/tensil` folder with the ones that you generate with tensil. Then, regenerate the project with the tcl script.
 
-In this configuration, the clock is set to 50MHz, but you can increase it to 125MHz maximum following this diagram : 
+In this configuration, the clock is set to 50MHz, but you can increase it to 125MHz maximum following this diagram :
 
 ![Clock change](./static/clock_change.png)
 
